@@ -80,6 +80,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     private double tempAJ[], tempAL[];
     private ResultSet tempRs;
     ArrayList<String> kode_nama_arr = new ArrayList();
+    private String nama_customer;
 
     public Penjualan_Penjualan() {
         initComponents();
@@ -479,7 +480,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
             String sql = "select b.kode_barang, b.nama_barang, b.harga_jual_1_barang, "
                     + "b.harga_jual_2_barang, b.harga_jual_3_barang, b.harga_rata_rata_barang, "
                     + "bl.jumlah from barang b, barang_lokasi bl, lokasi l where b.kode_barang = bl.kode_barang and "
-                    + "bl.kode_lokasi = l.kode_lokasi and l.nama_lokasi='toko' and b.kode_barang = '" + split[0] + "' "
+                    + "bl.kode_lokasi = l.kode_lokasi and l.nama_lokasi='toko' and b.kode_barang = '" + split[0].trim() + "' "
                     + "and bl.kode_lokasi=4";
             System.out.println("jumlahhhh: " + sql);
             java.sql.Connection conn = (Connection) Koneksi.configDB();
@@ -999,7 +1000,9 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
             while (res.next()) {
                 String kode = res.getString(1);
                 String name = res.getString(2);
-                comCustomer.addItem(name);
+//                comCustomer.addItem(name);
+                comCustomer.addItem(kode+" - "+name);
+                
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
@@ -2388,8 +2391,17 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_lbl_SaveMouseClicked
 
     private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comCustomerActionPerformed
+        int kode_customer = 0;
+//        TableModel tabelModel;
+        String nama_awal = String.valueOf(comCustomer.getSelectedItem());
+        String[] split = new String[2];
+//        System.out.println("Nilai comCustomer adalah " + comCustomer.getSelectedItem());
+        if (comCustomer.getSelectedItem() != null) {
+            split = nama_awal.split("-");
+        }
         try {
-            String sql = "select * from customer where nama_customer = '" + comCustomer.getSelectedItem() + "'";
+            String sql = "select * from customer where nama_customer = '" + split[1].trim() + "'";
+            this.nama_customer = split[0];
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
@@ -2397,8 +2409,8 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                 String kode = res.getString(1);
                 String nama = res.getString(2);
                 String alamat = res.getString(4);
-//                String kode = res.getString(1);
-                //    comCustomer.addItem(kode+" - "+nama);
+//                    comCustomer.addItem(kode);
+//                comCustomer.setSelectedItem(kode);
                 txt_Nama.setText(nama);
                 txt_Alamat.setText(alamat);
             }
