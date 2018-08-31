@@ -12,6 +12,8 @@ import Java.Currency_Column;
 import Java.ListPiutangBG;
 import Java.modelTabelPiutangBG;
 import static UI.Pembelian_Hutang.dotConverter;
+import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,10 +21,15 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -39,6 +46,13 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
     private List<ListPiutangBG> list;
     private TableModel model;
     private ListPiutangBG ListPiutangBG;
+    private String nama_customer;
+    private String kode_customer;
+    
+    ArrayList<String> kode_nama_arr = new ArrayList();
+    
+    private static int item = 0;
+    private boolean tampil = true;
 
     public Penjualan_PiutangBG() {
         initComponents();
@@ -47,14 +61,74 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
         clock = new Clock(lblTanggal, 3);
         loadCustomer();
         tampilTabel("*");
+        
+        ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                System.out.println("insert");
+
+                if (item == 0) {
+                    loadCustomer(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
+                } else {
+                    item = 0;
+                }
+                Runnable doHighlight = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (tampil) {
+                            //tbl_Pembelian.editCellAt(tbl_Pembelian.getSelectedRow(), 2);
+                            comCustomer.setPopupVisible(true);
+                        }
+
+                    }
+                };
+                SwingUtilities.invokeLater(doHighlight);
+            }
+     public void removeUpdate(DocumentEvent e) {
+                System.out.println("remove");
+                System.out.println(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
+                String key = ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText();
+                System.out.println(key);
+                //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
+            }
+      public void changedUpdate(DocumentEvent e) {
+                System.out.println("change");
+
+            }
+
+        });
+        ((JTextComponent) comCustomer.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
+            
+            public void keyTyped(java.awt.event.KeyEvent e) {
+
+            }
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                tampil = true;
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    tampil = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    tampil = true;
+                }
+            }
+            public void keyReleased(java.awt.event.KeyEvent e) {
+
+            }
+        });
     }
 
     public void tampilTabel(String param) {
 //        removeRow();
-        if (param.equals("*")) {
-            param = "";
-        }
+//        if (param.equals("*")) {
+//            param = "";
+//        }
 //        DefaultTableModel model = (DefaultTableModel) TabelPiutangBG.getModel();
+
+        int kode_customer = 0;
+        String nama_awal = String.valueOf(comCustomer.getSelectedItem());
+        String[] split = new String[2];
+        if (comCustomer.getSelectedItem() != null) {
+            split = nama_awal.split("-");
+        }
+
         int i = 1;
         try {
             String sql = "SELECT *, SUM(pembaran_udah_bayar) as biaya "
@@ -63,8 +137,11 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
                     + "AND penjualan.kode_salesman = salesman.kode_salesman "
                     + "AND `pembaran_udah_bayar` < 0 "
                     + "AND `faktur_bg_penjualan` != '' "
-                    + "AND customer.nama_customer like '%" + param + "%'"
+                    + "AND customer.nama_customer like '%" + split[1].trim() + "%'"
+//                    + "AND customer.nama_customer like '%" + param + "%' OR customer.kode_customer like '%" + param + "%'"
                     + "GROUP BY `faktur_bg_penjualan` ORDER BY `faktur_bg_penjualan` DESC";
+            this.kode_customer = split[0];
+            this.nama_customer = split[1];
             System.out.println("sqlpiutangBG: " + sql);
             Connection conn = (Connection) Koneksi.configDB();
             Statement stat = conn.createStatement();
@@ -116,6 +193,45 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, e);
         }
     }
+    
+    void loadCustomer(String param) {
+        if (param.equals("*")) {
+            param = "";
+        }
+        if (param.substring(0, 1).equals(" ")) {
+            param = param.substring(1);
+        }
+        try {
+//            String sql = "select * from cutomer where nama_customer like '%"+param+"%' or kode_customer like '%"+param+"%'";
+            String sql = "select concat(kode_customer,\" - \",nama_customer) as gabung from customer "
+                    + "where kode_customer ='" + param + "' OR nama_customer like '%" + param + "%'";
+//            System.out.println("sql: " + sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+//            System.out.println("ini sql com kode nama " + sql);
+            kode_nama_arr.clear();
+            kode_nama_arr.add("");
+            while (res.next()) {
+                String gabung = res.getString("gabung");
+                kode_nama_arr.add(gabung);
+                item++;
+            }
+            if (item == 0) {
+                item = 1;
+            }
+//            System.out.println("kdenamarr: " + kode_nama_arr);
+            comCustomer.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
+            //((JTextComponent) comSupplier.getEditor().getEditorComponent()).setText(param);
+            conn.close();
+            res.close();
+//            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "Eror -- 190" + e);
+        }
+
+    }
 
     void loadCustomer() {
 
@@ -125,7 +241,7 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
-                String name = res.getString(2);
+                String name = res.getString(1) + " - " + res.getString(2);
                 comCustomer.addItem(name);
             }
         } catch (Exception e) {

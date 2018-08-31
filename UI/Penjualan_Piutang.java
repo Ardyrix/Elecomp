@@ -13,6 +13,8 @@ import Java.ListPiutang;
 import Java.modelTabelPegawai;
 import Java.modelTabelPiutang;
 import static UI.Pembelian_Hutang.dotConverter;
+import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,9 +25,14 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -45,7 +52,16 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
     private int[] hrgItem;
     private Clock clock;
     private String kode_customer;
+    private String nama_customer;
 
+    ArrayList<String> kode_nama_arr = new ArrayList();
+    ArrayList<String> kode_nama_arr1 = new ArrayList();
+    ArrayList<String> kode_nama_arrk = new ArrayList();
+    
+    private static int item = 0;
+    private boolean tampil = true;
+    
+    
     /**
      * Creates new form Penjualan_piutang
      */
@@ -55,10 +71,60 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
 
         clock = new Clock(lblTanggal, 3);
         loadCustomer();
-        comCustomer.requestFocus();
         tampilTabel("*");
-    }
+        
+        ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                System.out.println("insert");
 
+                if (item == 0) {
+                    loadCustomer(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
+                } else {
+                    item = 0;
+                }
+                Runnable doHighlight = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (tampil) {
+                            //tbl_Pembelian.editCellAt(tbl_Pembelian.getSelectedRow(), 2);
+                            comCustomer.setPopupVisible(true);
+                        }
+
+                    }
+                };
+                SwingUtilities.invokeLater(doHighlight);
+            }
+     public void removeUpdate(DocumentEvent e) {
+                System.out.println("remove");
+                System.out.println(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
+                String key = ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText();
+                System.out.println(key);
+                //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
+            }
+      public void changedUpdate(DocumentEvent e) {
+                System.out.println("change");
+
+            }
+
+        });
+        ((JTextComponent) comCustomer.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
+            
+            public void keyTyped(java.awt.event.KeyEvent e) {
+
+            }
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                tampil = true;
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    tampil = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    tampil = true;
+                }
+            }
+            public void keyReleased(java.awt.event.KeyEvent e) {
+
+            }
+        });
+    }
     private String currency_convert(int nilai) {
         DecimalFormat kursIndonesia = (DecimalFormat) DecimalFormat.getCurrencyInstance();
         DecimalFormatSymbols formatRp = new DecimalFormatSymbols();
@@ -71,9 +137,17 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
 
     public void tampilTabel(String param) {
         removeRow();
-        if (param.equals("*")) {
-            param = "";
+        
+        int kode_customer = 0;
+        String nama_awal = String.valueOf(comCustomer.getSelectedItem());
+        String[] split = new String[2];
+        if (comCustomer.getSelectedItem() != null) {
+            split = nama_awal.split("-");
         }
+
+//        if (param.equals("*")) {
+//            param = "";
+//        }
         DefaultTableModel model = (DefaultTableModel) jTable7.getModel();
         int i = 1;
         try {
@@ -82,9 +156,10 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
                     + "WHERE penjualan.kode_customer = customer.kode_customer "
                     + "AND `pembaran_udah_bayar` < 0 "
                     //                    + "AND `faktur_bg_penjualan` = '' "
-                    + "AND customer.kode_customer ='" + param + "' OR customer.nama_customer like '%" + param + "%'"
-//                    + "AND customer.nama_customer like '%" + param + "%'"
+                    + "AND customer.nama_customer like '%" + split[1].trim() + "%'"
                     + "GROUP BY `no_faktur_penjualan` ORDER BY `tgl_penjualan` DESC";
+            this.kode_customer = split[0];
+            this.nama_customer = split[1];
             System.out.println("sql: " + sql);
             Connection conn = (Connection) Koneksi.configDB();
             Statement stat = conn.createStatement();
@@ -137,22 +212,64 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
         }
     }
 
-    void loadCustomer() {
+     void loadCustomer(String param) {
+        if (param.equals("*")) {
+            param = "";
+        }
+        if (param.substring(0, 1).equals(" ")) {
+            param = param.substring(1);
+        }
+        try {
+//            String sql = "select * from cutomer where nama_customer like '%"+param+"%' or kode_customer like '%"+param+"%'";
+            String sql = "select concat(kode_customer,\" - \",nama_customer) as gabung from customer "
+                    + "where kode_customer ='" + param + "' OR nama_customer like '%" + param + "%'";
+//            System.out.println("sql: " + sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+//            System.out.println("ini sql com kode nama " + sql);
+            kode_nama_arr.clear();
+            kode_nama_arr.add("");
+            while (res.next()) {
+                String gabung = res.getString("gabung");
+                kode_nama_arr.add(gabung);
+                item++;
+            }
+            if (item == 0) {
+                item = 1;
+            }
+//            System.out.println("kdenamarr: " + kode_nama_arr);
+            comCustomer.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
+            //((JTextComponent) comSupplier.getEditor().getEditorComponent()).setText(param);
+            conn.close();
+            res.close();
+//            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "Eror -- 190" + e);
+        }
+
+    }
+//      private void comCustomerItemStateChanged(java.awt.event.ItemEvent evt) {                                             
+//        tampil = false;
+//    }    
+      
+      
+     void loadCustomer() {
 
         try {
-            String sql = "select * from customer order by nama_customer";
+            String sql = "select * from customer";
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
                 String name = res.getString(1) + " - " + res.getString(2);
-//                String name2 = res.getString(2);
                 comCustomer.addItem(name);
-//                comCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {}));
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
+
     }
 
     public void autoSum() {
@@ -205,7 +322,7 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
 
         jPanel16 = new javax.swing.JPanel();
@@ -302,7 +419,12 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
 
         jLabel1.setText("Sales");
 
-        comCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- Pilih Customer --" }));
+        comCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "---Pilih Pustomer---" }));
+        comCustomer.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comCustomerItemStateChanged(evt);
+            }
+        });
         comCustomer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comCustomerActionPerformed(evt);
@@ -323,7 +445,7 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
                             .addGroup(jPanel16Layout.createSequentialGroup()
                                 .addComponent(jLabel52)
                                 .addGap(18, 18, 18)
-                                .addComponent(comCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(comCustomer, 0, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -350,7 +472,7 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
                         .addComponent(jLabel1))
                     .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel52)
-                        .addComponent(comCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(comCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator29, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -411,9 +533,9 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>                        
 
-    private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
+    private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {                                          
 //        JOptionPane.showMessageDialog(null, "index: "+);
         int index = comCustomer.getSelectedIndex();
         if (index <= 0) {
@@ -426,21 +548,21 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
             ppb.setFocusable(true);
 //            dispose();
         }
-    }//GEN-LAST:event_jButton14ActionPerformed
+    }                                         
 
-    private void txt_totalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_totalActionPerformed
+    private void txt_totalActionPerformed(java.awt.event.ActionEvent evt) {                                          
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_totalActionPerformed
+    }                                         
 
-    private void txtSalesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtSalesMouseClicked
+    private void txtSalesMouseClicked(java.awt.event.MouseEvent evt) {                                      
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtSalesMouseClicked
+    }                                     
 
-    private void txtSalesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSalesActionPerformed
+    private void txtSalesActionPerformed(java.awt.event.ActionEvent evt) {                                         
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtSalesActionPerformed
+    }                                        
 
-    private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comCustomerActionPerformed
+    private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {                                            
         int kode_customer = 0;
         TableModel tabelModel;
         String nama_awal = String.valueOf(comCustomer.getSelectedItem());
@@ -452,7 +574,7 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
         try {
             String sql = "select s.nama_salesman, c.nama_customer, c.kode_customer from customer c, salesman s "
                     + "where c.kode_salesman=s.kode_salesman "
-                    + "and c.kode_customer = '" + split[0] + "'";
+                    + "and c.kode_customer = '" + split[0].trim() + "'";
             this.kode_customer = split[0];
             System.out.println(sql);
             java.sql.Connection conn = (Connection) Koneksi.configDB();
@@ -461,7 +583,7 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
 //            System.out.println("saaaql: "+sql);
             while (res.next()) {
                 String name = res.getString(1);
-                comCustomer.setName(split[1]);
+//                comCustomer.setName(split[1]);
                 txtSales.setText(name);
             }
 //            System.out.println(comCustomer.getSelectedItem().toString());
@@ -475,15 +597,19 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
-    }//GEN-LAST:event_comCustomerActionPerformed
+    }                                           
 
-    private void jTable7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable7MouseClicked
+    private void jTable7MouseClicked(java.awt.event.MouseEvent evt) {                                     
         autoSum();
-    }//GEN-LAST:event_jTable7MouseClicked
+    }                                    
 
-    private void chk_pilihSemuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chk_pilihSemuaActionPerformed
+    private void chk_pilihSemuaActionPerformed(java.awt.event.ActionEvent evt) {                                               
         selectAll();
-    }//GEN-LAST:event_chk_pilihSemuaActionPerformed
+    }                                              
+
+    private void comCustomerItemStateChanged(java.awt.event.ItemEvent evt) {                                             
+       tampil = false;
+    }                                            
 
     /**
      * @param args the command line arguments
@@ -521,7 +647,7 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify                     
     private javax.swing.JCheckBox chk_pilihSemua;
     private javax.swing.JComboBox<String> comCustomer;
     private javax.swing.JButton jButton14;
@@ -537,5 +663,5 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
     private javax.swing.JLabel lblTanggal;
     private javax.swing.JTextField txtSales;
     private javax.swing.JTextField txt_total;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration                   
 }
