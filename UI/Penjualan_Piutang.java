@@ -57,9 +57,10 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
     ArrayList<String> kode_nama_arr = new ArrayList();
     ArrayList<String> kode_nama_arr1 = new ArrayList();
     ArrayList<String> kode_nama_arrk = new ArrayList();
-    
-    private static int item = 0;
-    private boolean tampil = true;
+    private static int item = 0, item1 = 0, itemk = 0;
+    private boolean tampil = true, tampil1 = true, tampilk = true;
+    private boolean ini_baru = false, akhir = true;
+
     
     
     /**
@@ -74,18 +75,19 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
         tampilTabel("*");
         
         ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            @Override
             public void insertUpdate(DocumentEvent e) {
                 System.out.println("insert");
 
-                if (item == 0) {
+                if (item1 == 0) {
                     loadCustomer(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
                 } else {
-                    item = 0;
+                    item1 = 0;
                 }
                 Runnable doHighlight = new Runnable() {
                     @Override
                     public void run() {
-                        if (tampil) {
+                        if (tampil1) {
                             //tbl_Pembelian.editCellAt(tbl_Pembelian.getSelectedRow(), 2);
                             comCustomer.setPopupVisible(true);
                         }
@@ -94,32 +96,40 @@ public class Penjualan_Piutang extends javax.swing.JFrame {
                 };
                 SwingUtilities.invokeLater(doHighlight);
             }
-     public void removeUpdate(DocumentEvent e) {
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
                 System.out.println("remove");
                 System.out.println(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
                 String key = ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText();
                 System.out.println(key);
                 //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
             }
-      public void changedUpdate(DocumentEvent e) {
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
                 System.out.println("change");
 
             }
 
         });
         ((JTextComponent) comCustomer.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
-            
+            @Override
             public void keyTyped(java.awt.event.KeyEvent e) {
 
             }
+
+            @Override
             public void keyPressed(java.awt.event.KeyEvent e) {
-                tampil = true;
+                tampil1 = true;
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tampil = false;
+                    tampil1 = false;
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    tampil = true;
+                    tampil1 = true;
                 }
             }
+
+            @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
 
             }

@@ -6,6 +6,49 @@
 package UI;
 
 import Class.Koneksi;
+import Java.Connect;
+import Java.Currency_Column;
+import com.sun.glass.events.KeyEvent;
+import java.awt.Frame;
+import java.awt.event.KeyListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputMap;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+import javax.swing.text.JTextComponent;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
+import Class.Koneksi;
 import Java.Clock;
 import Java.Connect;
 import Java.Currency_Column;
@@ -40,20 +83,42 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
     /**
      * Creates new form Penjualan_piutangBG
      */
-    private Connect connection;
     private ResultSet hasil;
     private Clock clock;
     private List<ListPiutangBG> list;
     private TableModel model;
     private ListPiutangBG ListPiutangBG;
     private String nama_customer;
-    private String kode_customer;
-    
+    private String kode_customer; 
+    public String totalclone;
+    public int Tempharga;
+    public int subtotalfix = 0;
+    int kode_barang = 1;
+    String kov;
+    ResultSet rs, rs1, rs2, rsx = null;
+    Connect connection, connection1;
+    private PreparedStatement PS, PSx;
+    public int subtotal1 = 0, hargajadi1 = 0, totalqty = 0, total = 0; //penjumlahan
+    public int hargaRekom = 0, harga = 0, Jharga = 0, subtotal = 0, hargajadi = 0;//panggil colom tabel
+    public int qty = 0;
+    public String tmpLokasi, tmpKonv, tmpKodeBarang, tmpKel;
+    public int tmpIdTOP, tmpKodeLokasi, tmpKodeKonv, jumlah_item;
+    public double tmpHJ1, tmpHJ2, tmpKonvPcs, tmppcs, jmlKonv, jumlahTambah, jmlQty, jumlah_qty;
+    private String nofaktur;
+    private DefaultTableModel tabel;
+    private String id, namabarang, kode_satuan;
+    private int tempPrev = 0, jmlKolom = 0, kode_lokasi;
+    private double tempJ, tempJQ, stok, jumlah = 0;
+    private int tempL, tempK;
+    private double tempAJ[], tempAL[];
+    private ResultSet tempRs;
     ArrayList<String> kode_nama_arr = new ArrayList();
-    
-    private static int item = 0;
-    private boolean tampil = true;
+    ArrayList<String> kode_nama_arr1 = new ArrayList();
+    private static int item = 0, item1 = 0, itemk = 0;
+    private boolean tampil = true, tampil1 = true, tampilk = true;
+    private boolean ini_baru = false, akhir = true;
 
+    
     public Penjualan_PiutangBG() {
         initComponents();
         this.setLocationRelativeTo(null);
@@ -63,18 +128,19 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
         tampilTabel("*");
         
         ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            @Override
             public void insertUpdate(DocumentEvent e) {
                 System.out.println("insert");
 
-                if (item == 0) {
+                if (item1 == 0) {
                     loadCustomer(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
                 } else {
-                    item = 0;
+                    item1 = 0;
                 }
                 Runnable doHighlight = new Runnable() {
                     @Override
                     public void run() {
-                        if (tampil) {
+                        if (tampil1) {
                             //tbl_Pembelian.editCellAt(tbl_Pembelian.getSelectedRow(), 2);
                             comCustomer.setPopupVisible(true);
                         }
@@ -83,32 +149,40 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
                 };
                 SwingUtilities.invokeLater(doHighlight);
             }
-     public void removeUpdate(DocumentEvent e) {
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
                 System.out.println("remove");
                 System.out.println(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
                 String key = ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText();
                 System.out.println(key);
                 //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
             }
-      public void changedUpdate(DocumentEvent e) {
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
                 System.out.println("change");
 
             }
 
         });
         ((JTextComponent) comCustomer.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
-            
+            @Override
             public void keyTyped(java.awt.event.KeyEvent e) {
 
             }
+
+            @Override
             public void keyPressed(java.awt.event.KeyEvent e) {
-                tampil = true;
+                tampil1 = true;
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tampil = false;
+                    tampil1 = false;
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    tampil = true;
+                    tampil1 = true;
                 }
             }
+
+            @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
 
             }
@@ -198,11 +272,11 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
         if (param.equals("*")) {
             param = "";
         }
-        if (param.substring(0, 1).equals(" ")) {
+        if (param.substring(0,1).equals(" ")) {
             param = param.substring(1);
         }
         try {
-//            String sql = "select * from cutomer where nama_customer like '%"+param+"%' or kode_customer like '%"+param+"%'";
+//            String sql = "select * from supplier where nama_supplier like '%"+param+"%' or kode_supplier like '%"+param+"%'";
             String sql = "select concat(kode_customer,\" - \",nama_customer) as gabung from customer "
                     + "where kode_customer ='" + param + "' OR nama_customer like '%" + param + "%'";
 //            System.out.println("sql: " + sql);
@@ -236,17 +310,22 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
     void loadCustomer() {
 
         try {
-            String sql = "select * from customer order by nama_customer";
+            String sql = "select * from customer";
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
+                //String kode = res.getString(1);
+                //String name = res.getString(2);
                 String name = res.getString(1) + " - " + res.getString(2);
-                comCustomer.addItem(name);
+                comCustomer.addItem(name);                
+                //comCustomer.addItem(kode+" - "+name);
+                
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
+
     }
 
     /**
@@ -262,7 +341,7 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
         jScrollPane8 = new javax.swing.JScrollPane();
         TabelPiutangBG = new javax.swing.JTable();
         jLabel52 = new javax.swing.JLabel();
-        comCustomer = new javax.swing.JComboBox<>();
+        comCustomer = new javax.swing.JComboBox();
         jPanel21 = new javax.swing.JPanel();
         jLabel93 = new javax.swing.JLabel();
         lblTanggal = new javax.swing.JLabel();
@@ -291,8 +370,15 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
 
         jLabel52.setText("Customer");
 
+        comCustomer.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
         comCustomer.setBackground(new java.awt.Color(255, 255, 204));
-        comCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- Pilih Customer --" }));
+        comCustomer.setEditable(true);
+        comCustomer.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Pilih Customer --" }));
+        comCustomer.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comCustomerItemStateChanged(evt);
+            }
+        });
         comCustomer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comCustomerActionPerformed(evt);
@@ -402,6 +488,10 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_comCustomerActionPerformed
 
+    private void comCustomerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comCustomerItemStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comCustomerItemStateChanged
+
     /**
      * @param args the command line arguments
      */
@@ -440,7 +530,7 @@ public class Penjualan_PiutangBG extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable TabelPiutangBG;
-    private javax.swing.JComboBox<String> comCustomer;
+    private javax.swing.JComboBox comCustomer;
     private javax.swing.JLabel jLabel52;
     private javax.swing.JLabel jLabel93;
     private javax.swing.JPanel jPanel20;

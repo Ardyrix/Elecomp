@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package UI;
 
 import Class.Koneksi;
@@ -72,15 +67,17 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     private String nofaktur;
     private DefaultTableModel tabel;
     private String id, namabarang, kode_satuan;
-    private static int item = 0;
-    private boolean tampil = true;
     private int tempPrev = 0, jmlKolom = 0, kode_lokasi;
     private double tempJ, tempJQ, stok, jumlah = 0;
     private int tempL, tempK;
     private double tempAJ[], tempAL[];
     private ResultSet tempRs;
     ArrayList<String> kode_nama_arr = new ArrayList();
+    ArrayList<String> kode_nama_arr1 = new ArrayList();
     private String nama_customer;
+    private static int item = 0, item1 = 0, itemk = 0;
+    private boolean tampil = true, tampil1 = true, tampilk = true;
+    private boolean ini_baru = false, akhir = true;
 
     public Penjualan_Penjualan() {
         initComponents();
@@ -107,7 +104,8 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         loadNumberTable();
         //  AturlebarKolom();
         autonumber();
-
+        comCustomer.requestFocus();
+        //loadComSatuanBarang();
         //JCombobox kode barang
         ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -227,6 +225,67 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
             }
         });
+        ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                System.out.println("insert");
+
+                if (item1 == 0) {
+                    loadCustomer(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
+                } else {
+                    item1 = 0;
+                }
+                Runnable doHighlight = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (tampil1) {
+                            //tbl_Pembelian.editCellAt(tbl_Pembelian.getSelectedRow(), 2);
+                            comCustomer.setPopupVisible(true);
+                        }
+
+                    }
+                };
+                SwingUtilities.invokeLater(doHighlight);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                System.out.println("remove");
+                System.out.println(((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText());
+                String key = ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getText();
+                System.out.println(key);
+                //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                System.out.println("change");
+
+            }
+
+        });
+        ((JTextComponent) comCustomer.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(java.awt.event.KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                tampil1 = true;
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    tampil1 = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    tampil1 = true;
+                }
+            }
+
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+
+            }
+        });
+        
 
     }
 
@@ -375,6 +434,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
             }
         });
+        
 
     }
 
@@ -500,18 +560,18 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                 if (selectedRow != -1) {
                     System.out.println("idddddddddddddddddddddddddd");
                     loadComTableLokasi();
-//                    comTableAsal.getItemAt(0);
+//                  comTableAsal.getItemAt(0);
 
-                    // loadComSatuanBarang(String.valueOf(kode_barang));
-                    //tbl_Penjualan.setValueAt(comSatuan.getItemAt(0), selectedRow, 3);
+                    //loadComSatuanBarang(String.valueOf(kode_barang));
                     loadComTableSatuan();
+                    //tbl_Penjualan.setValueAt(comSatuan.getItemAt(0), selectedRow, 3);
                     tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
                     tbl_Penjualan.setValueAt(comTableKonv.getItemAt(0), selectedRow, 4);
                     tbl_Penjualan.setValueAt(kode_barang, selectedRow, 1);
                     tbl_Penjualan.setValueAt(namabarang, selectedRow, 2);
                     tbl_Penjualan.setValueAt(0, selectedRow, 5);
                     tbl_Penjualan.setValueAt(harga, selectedRow, 6);
-//                    tbl_Penjualan.setValueAt(harga, selectedRow, 8);
+                    tbl_Penjualan.setValueAt(harga, selectedRow, 8);
 //                    System.out.println("harga: "+harga);
                     tbl_Penjualan.setValueAt(harga, selectedRow, 7);
 //                    System.out.println(jumlah);
@@ -990,6 +1050,45 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
     }
 
+    void loadCustomer(String param) {
+        if (param.equals("*")) {
+            param = "";
+        }
+        if (param.substring(0,1).equals(" ")) {
+            param = param.substring(1);
+        }
+        try {
+//            String sql = "select * from supplier where nama_supplier like '%"+param+"%' or kode_supplier like '%"+param+"%'";
+            String sql = "select concat(kode_customer,\" - \",nama_customer) as gabung from customer "
+                    + "where kode_customer ='" + param + "' OR nama_customer like '%" + param + "%'";
+//            System.out.println("sql: " + sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+//            System.out.println("ini sql com kode nama " + sql);
+            kode_nama_arr.clear();
+            kode_nama_arr.add("");
+            while (res.next()) {
+                String gabung = res.getString("gabung");
+                kode_nama_arr.add(gabung);
+                item++;
+            }
+            if (item == 0) {
+                item = 1;
+            }
+//            System.out.println("kdenamarr: " + kode_nama_arr);
+            comCustomer.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
+            //((JTextComponent) comSupplier.getEditor().getEditorComponent()).setText(param);
+            conn.close();
+            res.close();
+//            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "Eror -- 190" + e);
+        }
+
+    }
+    
     void loadCustomer() {
 
         try {
@@ -998,10 +1097,11 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
-                String kode = res.getString(1);
-                String name = res.getString(2);
-//                comCustomer.addItem(name);
-                comCustomer.addItem(kode+" - "+name);
+                //String kode = res.getString(1);
+                //String name = res.getString(2);
+                String name = res.getString(1) + " - " + res.getString(2);
+                comCustomer.addItem(name);                
+                //comCustomer.addItem(kode+" - "+name);
                 
             }
         } catch (Exception e) {
@@ -1360,7 +1460,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         jSeparator4 = new javax.swing.JSeparator();
         jSeparator5 = new javax.swing.JSeparator();
         jSeparator6 = new javax.swing.JSeparator();
-        comCustomer = new javax.swing.JComboBox<>();
+        comCustomer = new javax.swing.JComboBox();
         comOrder = new javax.swing.JComboBox<>();
         comStaff = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -1576,7 +1676,14 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
         jSeparator6.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        comCustomer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "=== Pilih Customer ===" }));
+        comCustomer.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
+        comCustomer.setEditable(true);
+        comCustomer.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "=== Pilih Customer ===" }));
+        comCustomer.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comCustomerItemStateChanged(evt);
+            }
+        });
         comCustomer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comCustomerActionPerformed(evt);
@@ -2391,7 +2498,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_lbl_SaveMouseClicked
 
     private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comCustomerActionPerformed
-        int kode_customer = 0;
+/*        int kode_customer = 0;
 //        TableModel tabelModel;
         String nama_awal = String.valueOf(comCustomer.getSelectedItem());
         String[] split = new String[2];
@@ -2415,6 +2522,22 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                 txt_Alamat.setText(alamat);
             }
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }*/
+        try {
+            String sql = "select * from customer where kode_customer = '" + comCustomer.getSelectedItem() + "'";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                String nama = res.getString(2);
+                String alamat = res.getString(4);
+                //String rek = res.getString(9);
+                comCustomer.setSelectedItem(res.getString(1));
+                txt_Nama.setText(nama);
+                txt_Alamat.setText(alamat);
+                }
+            } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
     }//GEN-LAST:event_comCustomerActionPerformed
@@ -2597,6 +2720,11 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
+    private void comCustomerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comCustomerItemStateChanged
+        // TODO add your handling code here:
+        tampil1 = true;
+    }//GEN-LAST:event_comCustomerItemStateChanged
+
     private int getId_penjualan() {
         int nilai_id = 0;
         try {
@@ -2661,7 +2789,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox checkverif;
-    private javax.swing.JComboBox<String> comCustomer;
+    private javax.swing.JComboBox comCustomer;
     private javax.swing.JComboBox<String> comOrder;
     private javax.swing.JComboBox<String> comSalesman;
     private javax.swing.JComboBox<String> comStaff;
