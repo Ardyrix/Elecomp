@@ -5,11 +5,12 @@
  */
 package UI;
 
-
 import Java.Connect;
+import Java.Currency_Column;
 import Java.ListSetBarang;
 import Java.modelTabelSetBarang;
 import com.placeholder.PlaceHolder;
+import java.awt.event.KeyEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -26,15 +28,16 @@ import javax.swing.table.TableRowSorter;
  */
 public class Master_SetHargaBarang2 extends javax.swing.JDialog {
 
-      private Connect connection;
-      private ResultSet hasil;
-      private ArrayList<ListSetBarang> list;
-      private ListSetBarang listbarang;
-      private TableModel model;
-      private PreparedStatement PS;
-      String sql, kodebrg;
-      ResultSet rs;
-      private int kode_barang;
+    private Connect connection;
+    private ResultSet hasil;
+    private ArrayList<ListSetBarang> list;
+    private ListSetBarang listbarang;
+    private TableModel model;
+    private PreparedStatement PS;
+    String sql, kodebrg;
+    ResultSet rs;
+    private int kode_barang;
+
     public Master_SetHargaBarang2(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
@@ -42,25 +45,28 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         tampilTabel("*");
         holder();
     }
-    public void holder(){
+
+    public void holder() {
         PlaceHolder holder;
-        holder = new PlaceHolder(harga1,"masukan harga 1");
-        holder = new PlaceHolder(harga2,"masukan harga 2");
-        holder = new PlaceHolder(harga3,"masukan harga 3");
+        holder = new PlaceHolder(harga1, "masukan harga 1");
+        holder = new PlaceHolder(harga2, "masukan harga 2");
+        holder = new PlaceHolder(harga3, "masukan harga 3");
     }
-    public void cari(){
-         try {
-            String sql = "select * from barang where nama_barang like '%" +jcari.getText()+"%'";
-            hasil=connection.ambilData(sql);
+
+    public void cari() {
+        try {
+            String sql = "select * from barang where nama_barang like '%" + jcari.getText() + "%'";
+            hasil = connection.ambilData(sql);
         } catch (Exception e) {
-            System.out.println("gagal query ini"+e);
+            System.out.println("gagal query ini" + e);
         }
     }
-   private void tampilTabel(String param) {
+
+    private void tampilTabel(String param) {
         String data = "";
         try {
             data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
-                    + "FROM barang "+ (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
+                    + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
             hasil = connection.ambilData(data);
             //System.out.println("sukses query tampil tabel");
             setModel(hasil);
@@ -72,7 +78,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
 //            System.out.println(data);
         }
     }
-    
+
     private void setModel(ResultSet hasil) {
         try {
             list = new ArrayList<>();
@@ -91,11 +97,15 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             }
             model = new modelTabelSetBarang(list);
             jTable10.setModel(model);
+            TableColumnModel m = jTable10.getColumnModel();
+            m.getColumn(3).setCellRenderer(new Currency_Column());
+            m.getColumn(4).setCellRenderer(new Currency_Column());
+            m.getColumn(5).setCellRenderer(new Currency_Column());
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e);
         }
     }
-   
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -225,6 +235,11 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                 jTable10MouseClicked(evt);
             }
         });
+        jTable10.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTable10KeyReleased(evt);
+            }
+        });
         jScrollPane14.setViewportView(jTable10);
 
         jcari.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.gray, java.awt.Color.lightGray, java.awt.Color.lightGray));
@@ -320,52 +335,50 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_harga3KeyPressed
 
     private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
-            
-         try{
-             String sql="update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
-              PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
-              p.setString(1, harga1.getText().toString());
-              p.setString(2, harga2.getText().toString());
-              p.setString(3, harga3.getText().toString());
-              p.setString(4,kodebrg);
+
+        try {
+            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
+            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
+            p.setString(1, harga1.getText().toString());
+            p.setString(2, harga2.getText().toString());
+            p.setString(3, harga3.getText().toString());
+            p.setString(4, kodebrg);
 //                p.setInt(2, id);
-                p.executeUpdate();
-                tampilTabel("*");
-                System.out.print(p);
-                 JOptionPane.showMessageDialog(null,"Data sukses di edit");
-             
-         }
-        catch(Exception e){
+            p.executeUpdate();
+            tampilTabel("*");
+            System.out.print(p);
+            JOptionPane.showMessageDialog(null, "Data sukses di edit");
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }//GEN-LAST:event_btsethargaActionPerformed
 
     private void jTable10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable10MouseClicked
-        
-        try{
-            int row =jTable10.getSelectedRow();
-            String table_click=(jTable10.getModel().getValueAt(row, 0).toString());
-            String sql="select * from barang where kode_barang='"+table_click+"' ";
-            hasil= connection.ambilData(sql);
+
+        try {
+            int row = jTable10.getSelectedRow();
+            String table_click = (jTable10.getModel().getValueAt(row, 1).toString());
+            String sql = "select * from barang where kode_barang='" + table_click + "' ";
+            hasil = connection.ambilData(sql);
 //            rs = PS.executeQuery();
             System.out.println("sukses query tampil tabel");
-            if(hasil.next()){
-                
-                String add1=hasil.getString("harga_jual_1_barang");
+            while (hasil.next()) {
+
+                String add1 = hasil.getString("harga_jual_1_barang");
                 harga1.setText(add1);
-                String add2=hasil.getString("harga_jual_2_barang");
+                String add2 = hasil.getString("harga_jual_2_barang");
                 harga2.setText(add2);
-                String add3=hasil.getString("harga_jual_3_barang");
+                String add3 = hasil.getString("harga_jual_3_barang");
                 harga3.setText(add3);
-                kodebrg=hasil.getString("kode_barang");
+                kodebrg = hasil.getString("kode_barang");
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }//GEN-LAST:event_jTable10MouseClicked
 
     private void harga1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyTyped
-
 
     }//GEN-LAST:event_harga1KeyTyped
 
@@ -382,7 +395,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_harga1FocusGained
 
     private void harga1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_harga1FocusLost
- 
+
     }//GEN-LAST:event_harga1FocusLost
 
     private void jcariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcariKeyReleased
@@ -400,6 +413,37 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     private void jcariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcariActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jcariActionPerformed
+
+    private void jTable10KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTable10KeyReleased
+        switch (evt.getKeyCode()) {
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_ENTER:
+                try {
+                    int row = jTable10.getSelectedRow();
+                    String table_click = (jTable10.getModel().getValueAt(row, 1).toString());
+                    String sql = "select * from barang where kode_barang='" + table_click + "' ";
+                    hasil = connection.ambilData(sql);
+//            rs = PS.executeQuery();
+                    System.out.println("sukses query tampil tabel");
+                    while (hasil.next()) {
+
+                        String add1 = hasil.getString("harga_jual_1_barang");
+                        harga1.setText(add1);
+                        String add2 = hasil.getString("harga_jual_2_barang");
+                        harga2.setText(add2);
+                        String add3 = hasil.getString("harga_jual_3_barang");
+                        harga3.setText(add3);
+                        kodebrg = hasil.getString("kode_barang");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            default:
+                break;
+        }
+    }//GEN-LAST:event_jTable10KeyReleased
 
     /**
      * @param args the command line arguments
@@ -442,7 +486,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             }
         });
     }
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btsetharga;
