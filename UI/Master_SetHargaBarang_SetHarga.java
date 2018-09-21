@@ -5,11 +5,33 @@
  */
 package UI;
 
+import Java.Connect;
+import Java.Currency_Column;
+import Java.ListBarang;
+import Java.modelTabelBarang;
+import com.placeholder.PlaceHolder;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.table.TableColumnModel;
+
 /**
  *
  * @author User
  */
 public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
+
+    private Connect connection;
+    private PreparedStatement PS;
+    private ArrayList<ListBarang> list;
+    private ListBarang listbarang;
+    private ResultSet hasil;
+    String kodebrg;
+//    public Master_SetHargaBarang shb = null;
+//    public JTextField harga1, harga2, harga3;
 
     /**
      * Creates new form NewJFrame
@@ -17,6 +39,60 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
     public Master_SetHargaBarang_SetHarga() {
         initComponents();
         this.setLocationRelativeTo(null);
+
+    }
+    
+    public void setHarga() {
+        Master_SetHargaBarang shb = new Master_SetHargaBarang();
+        shb.sh = this;
+        this.harga1 = (JTextField) getValueAt(shb.harga1);
+        this.harga2 = (JTextField) getValueAt(shb.harga2);
+        this.harga3 = (JTextField) getValueAt(shb.harga3);
+
+    }
+    
+    private void tampilTabel(String param) {
+        String data = "";
+        try {
+            data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
+                    + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
+            hasil = connection.ambilData(data);
+            //System.out.println("sukses query tampil tabel");
+            setModel(hasil);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("ERROR -> " + e.getMessage());
+        } finally {
+//            System.out.println(data);
+        }
+    }
+
+    private void setModel(ResultSet hasil) {
+        try {
+            list = new ArrayList<>();
+            int a = 0;
+            while (hasil.next()) {
+                a++;
+                this.listbarang = new ListBarang();
+                this.listbarang.setNo(a);
+                this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
+                this.listbarang.setNama_barang(hasil.getString("nama_barang"));
+                this.listbarang.setHarga_jual_1(hasil.getInt("harga_jual_1_barang"));
+                this.listbarang.setHarga_jual_2(hasil.getInt("harga_jual_2_barang"));
+                this.listbarang.setHarga_jual_3(hasil.getInt("harga_jual_3_barang"));
+                list.add(listbarang);
+                listbarang = null;
+            }
+//            model = new modelTabelBarang(list);
+//            jTable10.setModel(model);
+//            TableColumnModel m = jTable10.getColumnModel();
+//            m.getColumn(3).setCellRenderer(new Currency_Column());
+//            m.getColumn(4).setCellRenderer(new Currency_Column());
+//            m.getColumn(5).setCellRenderer(new Currency_Column());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
     }
 
     /**
@@ -30,36 +106,52 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
 
         jLabel72 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
-        jTextField42 = new javax.swing.JTextField();
+        harga3 = new javax.swing.JTextField();
         jLabel74 = new javax.swing.JLabel();
-        jTextField39 = new javax.swing.JTextField();
-        jTextField41 = new javax.swing.JTextField();
+        harga1 = new javax.swing.JTextField();
+        harga2 = new javax.swing.JTextField();
         jLabel73 = new javax.swing.JLabel();
         jLabel75 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btsimpan = new javax.swing.JButton();
+        btclose = new javax.swing.JButton();
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         jLabel72.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel72.setText("Rincian Barang");
 
-        jTextField42.addActionListener(new java.awt.event.ActionListener() {
+        harga3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField42ActionPerformed(evt);
+                harga3ActionPerformed(evt);
             }
         });
 
         jLabel74.setText("Harga Jual 2");
 
+        harga2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                harga2ActionPerformed(evt);
+            }
+        });
+
         jLabel73.setText("Harga Jual 1");
 
         jLabel75.setText("Harga Jual 3");
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Gambar/if_stock_save_20659.png"))); // NOI18N
-        jButton1.setText("Simpan");
+        btsimpan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Gambar/if_stock_save_20659.png"))); // NOI18N
+        btsimpan.setText("Simpan");
+        btsimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btsimpanActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Close");
+        btclose.setText("Close");
+        btclose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btcloseActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -76,9 +168,9 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
                             .addComponent(jLabel75))
                         .addGap(81, 81, 81)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField41)
-                            .addComponent(jTextField39)
-                            .addComponent(jTextField42, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(harga2)
+                            .addComponent(harga1)
+                            .addComponent(harga3, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(26, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jSeparator1)
@@ -87,9 +179,9 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(121, 121, 121)
-                        .addComponent(jButton1)
+                        .addComponent(btsimpan)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2))
+                        .addComponent(btclose))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel72)))
@@ -104,20 +196,20 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField39, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(harga1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel73))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField41, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(harga2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel74))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField42, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(harga3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel75))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(btsimpan)
+                    .addComponent(btclose))
                 .addGap(20, 20, 20))
         );
 
@@ -125,15 +217,42 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField42ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField42ActionPerformed
+    private void harga3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga3ActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField42ActionPerformed
+    }//GEN-LAST:event_harga3ActionPerformed
+
+    private void btsimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsimpanActionPerformed
+        try {
+            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
+            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
+            p.setString(1, harga1.getText().toString());
+            p.setString(2, harga2.getText().toString());
+            p.setString(3, harga3.getText().toString());
+            p.setString(4, kodebrg);
+//                p.setInt(2, id);
+            p.executeUpdate();
+            tampilTabel("*");
+            System.out.print(p);
+            JOptionPane.showMessageDialog(null, "Data sukses di edit");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_btsimpanActionPerformed
+
+    private void btcloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btcloseActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btcloseActionPerformed
+
+    private void harga2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_harga2ActionPerformed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-               /* Set the Nimbus look and feel */
+        /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
@@ -287,20 +406,26 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Master_SetHargaBarang_SetHarga().setVisible(true);
+                
             }
+            
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btclose;
+    private javax.swing.JButton btsimpan;
+    private javax.swing.JTextField harga1;
+    private javax.swing.JTextField harga2;
+    private javax.swing.JTextField harga3;
     private javax.swing.JLabel jLabel72;
     private javax.swing.JLabel jLabel73;
     private javax.swing.JLabel jLabel74;
     private javax.swing.JLabel jLabel75;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextField jTextField39;
-    private javax.swing.JTextField jTextField41;
-    private javax.swing.JTextField jTextField42;
     // End of variables declaration//GEN-END:variables
+
+    private Object getValueAt(JTextField harga1) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

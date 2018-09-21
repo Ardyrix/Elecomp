@@ -6,96 +6,58 @@
 package UI;
 
 import Java.Connect;
-import Java.ListBarang;
-import Java.ListPegawai;
-import Java.modelTabelPegawai;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import static java.util.Collections.list;
-import javax.swing.JOptionPane;
-import javax.swing.table.TableModel;
-import Java.Connect;
 import Java.Currency_Column;
-import Java.ListSetBarang;
-import Java.modelTabelSetBarang;
+import Java.ListBarang;
+import Java.modelTabelBarang;
 import com.placeholder.PlaceHolder;
+import java.awt.Frame;
 import java.awt.event.KeyEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import Class.Koneksi;
-import Java.Clock;
-import Java.Connect;
-import Java.ListPegawai;
-import Java.ListPiutang;
-import Java.modelTabelPegawai;
-import Java.modelTabelPiutang;
-import static UI.Pembelian_Hutang.dotConverter;
-import java.awt.event.KeyListener;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.text.JTextComponent;
+
 /**
  *
  * @author User
  */
-public class Master_SetHargaBarang extends javax.swing.JFrame {
+public class Master_SetHargaBarang extends javax.swing.JDialog {
 
-      private Connect connection;
-      private ResultSet hasil;
-      private ArrayList<ListBarang> list;
-      private ListBarang listbarang;
-      private TableModel model;
-      private PreparedStatement PS;
-      String sql, kodebrg;
-      ResultSet rs;
-      private int kode_barang;
+    private Connect connection;
+    private ResultSet hasil;
+    private ArrayList<ListBarang> list;
+    private ListBarang listbarang;
+    private TableModel model;
+    private PreparedStatement PS;
+    String sql, kodebrg;
+    ResultSet rs;
+    private int kode_barang;
 
-      
     public Master_SetHargaBarang() {
         initComponents();
         this.setLocationRelativeTo(null);
     }
- public Master_SetHargaBarang(java.awt.Frame parent, boolean modal, Connect connection) {
-//        super(parent, modal);
+
+    public Master_SetHargaBarang(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
         initComponents();
-        this.connection = connection;
+        this.connection = new Connect();
         tampilTabel("*");
     }
 
- public void holder() {
+
+    public void holder() {
         PlaceHolder holder;
-        holder = new PlaceHolder(h1, "masukan harga 1");
-        holder = new PlaceHolder(h2, "masukan harga 2");
-        holder = new PlaceHolder(h3, "masukan harga 3");
+        holder = new PlaceHolder(harga1, "masukan harga 1");
+        holder = new PlaceHolder(harga2, "masukan harga 2");
+        holder = new PlaceHolder(harga3, "masukan harga 3");
     }
 
     public void cari() {
@@ -130,17 +92,17 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
             int a = 0;
             while (hasil.next()) {
                 a++;
-                //this.listbarang = new ListSetBarang();
-                this.listbarang.setNomor(a);
+                this.listbarang = new ListBarang();
+                this.listbarang.setNo(a);
                 this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
                 this.listbarang.setNama_barang(hasil.getString("nama_barang"));
-                this.listbarang.setHarga_jual_1_barang(hasil.getInt("harga_jual_1_barang"));
-                this.listbarang.setHarga_jual_2_barang(hasil.getInt("harga_jual_2_barang"));
-                this.listbarang.setHarga_jual_3_barang(hasil.getInt("harga_jual_3_barang"));
+                this.listbarang.setHarga_jual_1(hasil.getInt("harga_jual_1_barang"));
+                this.listbarang.setHarga_jual_2(hasil.getInt("harga_jual_2_barang"));
+                this.listbarang.setHarga_jual_3(hasil.getInt("harga_jual_3_barang"));
                 list.add(listbarang);
                 listbarang = null;
             }
-            //model = new modelTabelSetBarang(list);
+            model = new modelTabelBarang(list);
             jTable10.setModel(model);
             TableColumnModel m = jTable10.getColumnModel();
             m.getColumn(3).setCellRenderer(new Currency_Column());
@@ -150,6 +112,45 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, e);
         }
     }
+    
+//    public void autoSum() {
+//        int totalHutang = 0;
+//        int jumlahBaris = tbl_pembelianHutang.getRowCount();
+//        boolean action;
+//        int hargaItem = 0;
+//        int totalPotongan = 0;
+//        int jumFaktur = 0;
+//        noFaktur = new String[jumlahBaris];
+//        hrgItem = new int[jumlahBaris];
+//
+//        TableModel tabelModel;
+//        tabelModel = tbl_pembelianHutang.getModel();
+//        for (int i = 0; i < jumlahBaris; i++) {
+//            action = (boolean) tabelModel.getValueAt(i, 0);
+//            if (action == true) {
+//                hargaItem = Integer.valueOf(tabelModel.getValueAt(i, 6).toString());
+//                hrgItem[jumFaktur] = hargaItem;
+//                totalPotongan = Integer.valueOf(tabelModel.getValueAt(i, 7).toString());
+//                noFaktur[jumFaktur] = String.valueOf(tabelModel.getValueAt(i, 2));
+//                jumFaktur++;
+//            } else {
+//                hargaItem = 0;
+//                totalPotongan = 0;
+//            }
+//            totalHutang += hargaItem;
+//            potongan += totalPotongan;
+//        }
+//        txt_total.setText("" + totalHutang);
+//
+//        for (int i = 0; i < jumFaktur; i++) {
+//            System.out.println("noFaktur " + i + " " + noFaktur[i] + " Harga = " + hrgItem[i]);
+//        }
+//        System.out.println("=================================");
+//        this.jumFaktur = jumFaktur;
+//        this.totalHutang = totalHutang;
+//
+//    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -161,10 +162,10 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
 
         jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
-        h1 = new javax.swing.JTextField();
-        h2 = new javax.swing.JTextField();
-        h3 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        harga1 = new javax.swing.JTextField();
+        harga2 = new javax.swing.JTextField();
+        harga3 = new javax.swing.JTextField();
+        btnSetHarga = new javax.swing.JButton();
         jScrollPane14 = new javax.swing.JScrollPane();
         jTable10 = new javax.swing.JTable();
         cari = new javax.swing.JTextField();
@@ -176,46 +177,46 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
         jLabel1.setText("Set Harga Barang");
 
-        h1.addMouseListener(new java.awt.event.MouseAdapter() {
+        harga1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                h1MouseClicked(evt);
+                harga1MouseClicked(evt);
             }
         });
-        h1.addKeyListener(new java.awt.event.KeyAdapter() {
+        harga1.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                h1KeyPressed(evt);
+                harga1KeyPressed(evt);
             }
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                h1KeyTyped(evt);
+                harga1KeyTyped(evt);
             }
         });
 
-        h2.addMouseListener(new java.awt.event.MouseAdapter() {
+        harga2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                h2MouseClicked(evt);
+                harga2MouseClicked(evt);
             }
         });
-        h2.addKeyListener(new java.awt.event.KeyAdapter() {
+        harga2.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                h2KeyPressed(evt);
+                harga2KeyPressed(evt);
             }
         });
 
-        h3.addMouseListener(new java.awt.event.MouseAdapter() {
+        harga3.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                h3MouseClicked(evt);
+                harga3MouseClicked(evt);
             }
         });
-        h3.addKeyListener(new java.awt.event.KeyAdapter() {
+        harga3.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                h3KeyPressed(evt);
+                harga3KeyPressed(evt);
             }
         });
 
-        jButton1.setText("Set Harga");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSetHarga.setText("Set Harga");
+        btnSetHarga.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSetHargaActionPerformed(evt);
             }
         });
 
@@ -316,13 +317,13 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(h1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(harga1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(h2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(harga2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(h3, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(harga3, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addComponent(btnSetHarga)
                 .addGap(225, 225, 225))
         );
         layout.setVerticalGroup(
@@ -333,10 +334,10 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(h3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(h2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(h1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(harga3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(harga2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(harga1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSetHarga))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cari, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -349,38 +350,38 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
         setSize(new java.awt.Dimension(979, 510));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-   
-    private void h1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_h1MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_h1MouseClicked
 
-    private void h1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_h1KeyPressed
+    private void harga1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_harga1MouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_h1KeyPressed
+    }//GEN-LAST:event_harga1MouseClicked
 
-    private void h2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_h2MouseClicked
+    private void harga1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyPressed
         // TODO add your handling code here:
-    }//GEN-LAST:event_h2MouseClicked
+    }//GEN-LAST:event_harga1KeyPressed
 
-    private void h2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_h2KeyPressed
+    private void harga2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_harga2MouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_h2KeyPressed
+    }//GEN-LAST:event_harga2MouseClicked
 
-    private void h3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_h3MouseClicked
+    private void harga2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga2KeyPressed
         // TODO add your handling code here:
-    }//GEN-LAST:event_h3MouseClicked
+    }//GEN-LAST:event_harga2KeyPressed
 
-    private void h3KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_h3KeyPressed
+    private void harga3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_harga3MouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_h3KeyPressed
+    }//GEN-LAST:event_harga3MouseClicked
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void harga3KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga3KeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_harga3KeyPressed
+
+    private void btnSetHargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSetHargaActionPerformed
         try {
             String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
             PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
-            p.setString(1, h1.getText().toString());
-            p.setString(2, h2.getText().toString());
-            p.setString(3, h3.getText().toString());
+            p.setString(1, harga1.getText().toString());
+            p.setString(2, harga2.getText().toString());
+            p.setString(3, harga3.getText().toString());
             p.setString(4, kodebrg);
 //                p.setInt(2, id);
             p.executeUpdate();
@@ -391,11 +392,11 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnSetHargaActionPerformed
 
-    private void h1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_h1KeyTyped
+    private void harga1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyTyped
         // TODO add your handling code here:
-    }//GEN-LAST:event_h1KeyTyped
+    }//GEN-LAST:event_harga1KeyTyped
 
     private void jTable10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable10MouseClicked
         // TODO add your handling code here:
@@ -409,11 +410,11 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
             while (hasil.next()) {
 
                 String add1 = hasil.getString("harga_jual_1_barang");
-                h1.setText(add1);
+                harga1.setText(add1);
                 String add2 = hasil.getString("harga_jual_2_barang");
-                h2.setText(add2);
+                harga2.setText(add2);
                 String add3 = hasil.getString("harga_jual_3_barang");
-                h3.setText(add3);
+                harga3.setText(add3);
                 kodebrg = hasil.getString("kode_barang");
             }
         } catch (Exception e) {
@@ -442,11 +443,11 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
                     while (hasil.next()) {
 
                         String add1 = hasil.getString("harga_jual_1_barang");
-                        h1.setText(add1);
+                        harga1.setText(add1);
                         String add2 = hasil.getString("harga_jual_2_barang");
-                        h2.setText(add2);
+                        harga2.setText(add2);
                         String add3 = hasil.getString("harga_jual_3_barang");
-                        h3.setText(add3);
+                        harga3.setText(add3);
                         kodebrg = hasil.getString("kode_barang");
                     }
                 } catch (Exception e) {
@@ -462,30 +463,30 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-                /* Set the Nimbus look and feel */
+        /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                Master_SetHargaBarang frame = new Master_SetHargaBarang (new javax.swing.JFrame(), true);
-                frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                Master_SetHargaBarang dialog = new Master_SetHargaBarang(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
                     }
                 });
-                frame.setVisible(true);
+                dialog.setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnSetHarga;
     private javax.swing.JTextField cari;
-    private javax.swing.JTextField h1;
-    private javax.swing.JTextField h2;
-    private javax.swing.JTextField h3;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JTextField harga1;
+    private javax.swing.JTextField harga2;
+    private javax.swing.JTextField harga3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane14;
