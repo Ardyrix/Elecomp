@@ -7,41 +7,33 @@ package UI;
 
 import Java.Connect;
 import Java.Currency_Column;
-import Java.ListBarang;
-import Java.modelTabelBarang;
 import com.placeholder.PlaceHolder;
-import java.awt.Frame;
-import java.awt.event.KeyEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.RowFilter;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
+import Java.ListSetBarang;
+import Java.modelTabelSetBarang;
 
 /**
  *
  * @author User
  */
-public class Master_SetHargaBarang extends javax.swing.JDialog {
+public class Master_SetHargaBarang extends javax.swing.JFrame {
 
     private Connect connection;
     private ResultSet hasil;
-    private ArrayList<ListBarang> list;
-    private ListBarang listbarang;
+    private ArrayList<ListSetBarang> list;
+    private ListSetBarang listbarang;
     private TableModel model;
     private PreparedStatement PS;
     String sql, kodebrg;
     ResultSet rs;
     private int kode_barang;
-    private int jumBarang = 0;
-    private String[] kodeBarang;
-    private int[] hrgItem1, hrgItem2, hrgItem3;
+    Master_SetHargaBarang_SetHarga sh = new Master_SetHargaBarang_SetHarga();
 
     public Master_SetHargaBarang() {
         initComponents();
@@ -49,18 +41,18 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
     }
 
     public Master_SetHargaBarang(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+//        super(parent, modal);
         initComponents();
         this.connection = new Connect();
         tampilTabel("*");
+        holder();
     }
-
 
     public void holder() {
         PlaceHolder holder;
-        holder = new PlaceHolder(harga1, "masukan harga 1");
-        holder = new PlaceHolder(harga2, "masukan harga 2");
-        holder = new PlaceHolder(harga3, "masukan harga 3");
+        holder = new PlaceHolder(harga1, "Harga Barang 1");
+        holder = new PlaceHolder(harga2, "Harga Barang 2");
+        holder = new PlaceHolder(harga3, "Harga Barang 3");
     }
 
     public void cari() {
@@ -70,96 +62,6 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         } catch (Exception e) {
             System.out.println("gagal query ini" + e);
         }
-    }
-
-    private void tampilTabel(String param) {
-        String data = "";
-        try {
-            data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
-                    + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
-            hasil = connection.ambilData(data);
-            //System.out.println("sukses query tampil tabel");
-            setModel(hasil);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("ERROR -> " + e.getMessage());
-        } finally {
-//            System.out.println(data);
-        }
-    }
-
-    private void setModel(ResultSet hasil) {
-        try {
-            list = new ArrayList<>();
-            int a = 0;
-            while (hasil.next()) {
-                a++;
-                this.listbarang = new ListBarang();
-                this.listbarang.setNo(a);
-                this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
-                this.listbarang.setNama_barang(hasil.getString("nama_barang"));
-                this.listbarang.setHarga_jual_1(hasil.getInt("harga_jual_1_barang"));
-                this.listbarang.setHarga_jual_2(hasil.getInt("harga_jual_2_barang"));
-                this.listbarang.setHarga_jual_3(hasil.getInt("harga_jual_3_barang"));
-                list.add(listbarang);
-                listbarang = null;
-            }
-            model = new modelTabelBarang(list);
-            tbl_setHargaBarang.setModel(model);
-            TableColumnModel m = tbl_setHargaBarang.getColumnModel();
-            m.getColumn(3).setCellRenderer(new Currency_Column());
-            m.getColumn(4).setCellRenderer(new Currency_Column());
-            m.getColumn(5).setCellRenderer(new Currency_Column());
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, e);
-        }
-    }
-    
-    public void autoSum() {
-        int jumlahBaris = tbl_setHargaBarang.getRowCount();
-        boolean action;
-        int hargaItem1 = 0;
-        int hargaItem2 = 0;
-        int hargaItem3 = 0;
-        int jumBarang = 0;
-        kodeBarang = new String[jumlahBaris];
-        hrgItem1 = new int[jumlahBaris];
-        hrgItem2 = new int[jumlahBaris];
-        hrgItem3 = new int[jumlahBaris];
-
-        TableModel tabelModel;
-        tabelModel = tbl_setHargaBarang.getModel();
-        for (int i = 0; i < jumlahBaris; i++) {
-            action = (boolean) tabelModel.getValueAt(i, 0);
-            if (action == true) {
-                hargaItem1 = Integer.valueOf(tabelModel.getValueAt(i, 4).toString());
-                hrgItem1[jumBarang] = hargaItem1;
-                hargaItem2 = Integer.valueOf(tabelModel.getValueAt(i, 5).toString());
-                hrgItem2[jumBarang] = hargaItem2;
-                hargaItem3 = Integer.valueOf(tabelModel.getValueAt(i, 6).toString());
-                hrgItem3[jumBarang] = hargaItem3;
-                kodeBarang[jumBarang] = String.valueOf(tabelModel.getValueAt(i, 2));
-                jumBarang++;
-            } else {
-                hargaItem1 = 0;
-                hargaItem2 = 0;
-                hargaItem3 = 0;
-            }
-//            totalHutang += hargaItem;
-//            potongan += totalPotongan;
-        }
-        harga1.setText("" + hargaItem1);
-        harga2.setText("" + hargaItem2);
-        harga3.setText("" + hargaItem3);
-
-        for (int i = 0; i < jumBarang; i++) {
-            System.out.println("kodeBarang " + i + " " + kodeBarang[i] + " Harga1 = " + hrgItem1[i]
-            + " Harga2 = " + hrgItem2[i] + " Harga3 = " + hrgItem3[i]);
-        }
-        System.out.println("=================================");
-        this.jumBarang = jumBarang;
-
     }
 
     /**
@@ -176,7 +78,7 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         harga1 = new javax.swing.JTextField();
         harga2 = new javax.swing.JTextField();
         harga3 = new javax.swing.JTextField();
-        btnSetHarga = new javax.swing.JButton();
+        btsetharga = new javax.swing.JButton();
         jScrollPane14 = new javax.swing.JScrollPane();
         tbl_setHargaBarang = new javax.swing.JTable();
         cari = new javax.swing.JTextField();
@@ -188,20 +90,24 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
         jLabel1.setText("Set Harga Barang");
 
+        harga1.setEditable(false);
         harga1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 harga1MouseClicked(evt);
+            }
+        });
+        harga1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                harga1ActionPerformed(evt);
             }
         });
         harga1.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 harga1KeyPressed(evt);
             }
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                harga1KeyTyped(evt);
-            }
         });
 
+        harga2.setEditable(false);
         harga2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 harga2MouseClicked(evt);
@@ -213,6 +119,7 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
             }
         });
 
+        harga3.setEditable(false);
         harga3.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 harga3MouseClicked(evt);
@@ -224,86 +131,68 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
             }
         });
 
-        btnSetHarga.setText("Set Harga");
-        btnSetHarga.addActionListener(new java.awt.event.ActionListener() {
+        btsetharga.setText("Set Harga");
+        btsetharga.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSetHargaActionPerformed(evt);
+                btsethargaActionPerformed(evt);
             }
         });
 
         tbl_setHargaBarang.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "", "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
+                "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
             }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
+        ));
         tbl_setHargaBarang.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tbl_setHargaBarangMouseClicked(evt);
             }
         });
-        tbl_setHargaBarang.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                tbl_setHargaBarangKeyReleased(evt);
-            }
-        });
         jScrollPane14.setViewportView(tbl_setHargaBarang);
 
         cari.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.gray, java.awt.Color.lightGray, java.awt.Color.lightGray));
-        cari.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                cariKeyReleased(evt);
-            }
-        });
 
         jLabel2.setText("Kriteria");
 
@@ -334,7 +223,7 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(harga3, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnSetHarga)
+                .addComponent(btsetharga)
                 .addGap(225, 225, 225))
         );
         layout.setVerticalGroup(
@@ -348,7 +237,7 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
                     .addComponent(harga3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(harga2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(harga1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSetHarga))
+                    .addComponent(btsetharga))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cari, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -361,6 +250,49 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         setSize(new java.awt.Dimension(979, 510));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+   private void tampilTabel(String param) {
+//        System.out.println("yesss");
+        String data = "";
+        try {
+            data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
+                    + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
+            hasil = connection.ambilData(data);
+//            System.out.println("sukses query tampil tabel");
+            setModel(hasil);
+
+        } catch (Exception e) {
+            System.out.println("ERROR -> " + e.getMessage());
+        } finally {
+//            System.out.println(data);
+        }
+    }
+
+    private void setModel(ResultSet hasil) {
+        try {
+            list = new ArrayList<>();
+            int a = 0;
+            while (hasil.next()) {
+                a++;
+                this.listbarang = new ListSetBarang();
+                this.listbarang.setNomor(a);
+                this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
+                this.listbarang.setNama_barang(hasil.getString("nama_barang"));
+                this.listbarang.setHarga_jual_1_barang(hasil.getInt("harga_jual_1_barang"));
+                this.listbarang.setHarga_jual_2_barang(hasil.getInt("harga_jual_2_barang"));
+                this.listbarang.setHarga_jual_3_barang(hasil.getInt("harga_jual_3_barang"));
+                list.add(listbarang);
+                listbarang = null;
+            }
+            model = new modelTabelSetBarang(list);
+            tbl_setHargaBarang.setModel(model);
+            TableColumnModel m = tbl_setHargaBarang.getColumnModel();
+            m.getColumn(3).setCellRenderer(new Currency_Column());
+            m.getColumn(4).setCellRenderer(new Currency_Column());
+            m.getColumn(5).setCellRenderer(new Currency_Column());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
 
     private void harga1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_harga1MouseClicked
         // TODO add your handling code here:
@@ -386,31 +318,34 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_harga3KeyPressed
 
-    private void btnSetHargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSetHargaActionPerformed
-        try {
-            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
-            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
-            p.setString(1, harga1.getText().toString());
-            p.setString(2, harga2.getText().toString());
-            p.setString(3, harga3.getText().toString());
-            p.setString(4, kodebrg);
-//                p.setInt(2, id);
-            p.executeUpdate();
-            tampilTabel("*");
-            System.out.print(p);
-            JOptionPane.showMessageDialog(null, "Data sukses di edit");
+    private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
+        Master_SetHargaBarang_SetHarga sh = new Master_SetHargaBarang_SetHarga();
+        sh.setVisible(true);
+        sh.setFocusable(true);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }//GEN-LAST:event_btnSetHargaActionPerformed
+        sh.harga1.setText(harga1.getText());
+        sh.harga2.setText(harga2.getText());
+        sh.harga3.setText(harga3.getText());
 
-    private void harga1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyTyped
-        // TODO add your handling code here:
-    }//GEN-LAST:event_harga1KeyTyped
+//        try {
+//            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
+//            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
+//            p.setString(1, harga1.getText().toString());
+//            p.setString(2, harga2.getText().toString());
+//            p.setString(3, harga3.getText().toString());
+//            p.setString(4, kodebrg);
+////                p.setInt(2, id);
+//            p.executeUpdate();
+//            tampilTabel("*");
+//            System.out.print(p);
+//            JOptionPane.showMessageDialog(null, "Data sukses di edit");
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+    }//GEN-LAST:event_btsethargaActionPerformed
 
     private void tbl_setHargaBarangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_setHargaBarangMouseClicked
-        // TODO add your handling code here:
         try {
             int row = tbl_setHargaBarang.getSelectedRow();
             String table_click = (tbl_setHargaBarang.getModel().getValueAt(row, 1).toString());
@@ -433,42 +368,9 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_tbl_setHargaBarangMouseClicked
 
-    private void cariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cariKeyReleased
+    private void harga1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga1ActionPerformed
         // TODO add your handling code here:
-        tampilTabel(cari.getText().toString());
-    }//GEN-LAST:event_cariKeyReleased
-
-    private void tbl_setHargaBarangKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbl_setHargaBarangKeyReleased
-        // TODO add your handling code here:
-        switch (evt.getKeyCode()) {
-            case KeyEvent.VK_UP:
-            case KeyEvent.VK_DOWN:
-            case KeyEvent.VK_ENTER:
-                try {
-                    int row = tbl_setHargaBarang.getSelectedRow();
-                    String table_click = (tbl_setHargaBarang.getModel().getValueAt(row, 1).toString());
-                    String sql = "select * from barang where kode_barang='" + table_click + "' ";
-                    hasil = connection.ambilData(sql);
-//            rs = PS.executeQuery();
-                    System.out.println("sukses query tampil tabel");
-                    while (hasil.next()) {
-
-                        String add1 = hasil.getString("harga_jual_1_barang");
-                        harga1.setText(add1);
-                        String add2 = hasil.getString("harga_jual_2_barang");
-                        harga2.setText(add2);
-                        String add3 = hasil.getString("harga_jual_3_barang");
-                        harga3.setText(add3);
-                        kodebrg = hasil.getString("kode_barang");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                break;
-        }
-    }//GEN-LAST:event_tbl_setHargaBarangKeyReleased
+    }//GEN-LAST:event_harga1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -479,29 +381,304 @@ public class Master_SetHargaBarang extends javax.swing.JDialog {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("windows".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Master_SetHargaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Master_SetHargaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Master_SetHargaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Master_SetHargaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                Master_SetHargaBarang dialog = new Master_SetHargaBarang(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                Master_SetHargaBarang frame = new Master_SetHargaBarang(new javax.swing.JFrame(), true);
+                frame.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
                     }
                 });
-                dialog.setVisible(true);
+                frame.setVisible(true);
             }
         });
     }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnSetHarga;
+    private javax.swing.JButton btsetharga;
     private javax.swing.JTextField cari;
-    private javax.swing.JTextField harga1;
-    private javax.swing.JTextField harga2;
-    private javax.swing.JTextField harga3;
+    public javax.swing.JTextField harga1;
+    public javax.swing.JTextField harga2;
+    public javax.swing.JTextField harga3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane14;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTable tbl_setHargaBarang;
+    public javax.swing.JTable tbl_setHargaBarang;
     // End of variables declaration//GEN-END:variables
 }
