@@ -96,8 +96,8 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                 listbarang = null;
             }
             model = new modelTabelSetBarang(list);
-            jTable10.setModel(model);
-            TableColumnModel m = jTable10.getColumnModel();
+            tbl_setHargaBarang2.setModel(model);
+            TableColumnModel m = tbl_setHargaBarang2.getColumnModel();
             m.getColumn(3).setCellRenderer(new Currency_Column());
             m.getColumn(4).setCellRenderer(new Currency_Column());
             m.getColumn(5).setCellRenderer(new Currency_Column());
@@ -117,7 +117,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         harga3 = new javax.swing.JTextField();
         btsetharga = new javax.swing.JButton();
         jScrollPane14 = new javax.swing.JScrollPane();
-        jTable10 = new javax.swing.JTable();
+        tbl_setHargaBarang2 = new javax.swing.JTable();
         jcari = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
 
@@ -126,6 +126,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
         jLabel1.setText("Set Harga Barang");
 
+        harga1.setText("Masukkan Harga Jual 1");
         harga1.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 harga1FocusGained(evt);
@@ -139,6 +140,11 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                 harga1MouseClicked(evt);
             }
         });
+        harga1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                harga1ActionPerformed(evt);
+            }
+        });
         harga1.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 harga1KeyPressed(evt);
@@ -148,6 +154,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             }
         });
 
+        harga2.setText("Masukkan Harga Jual 2");
         harga2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 harga2MouseClicked(evt);
@@ -162,6 +169,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             }
         });
 
+        harga3.setText("Masukkan Harga Jual 3");
         harga3.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 harga3MouseClicked(evt);
@@ -183,7 +191,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             }
         });
 
-        jTable10.setModel(new javax.swing.table.DefaultTableModel(
+        tbl_setHargaBarang2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -230,17 +238,17 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                 "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
             }
         ));
-        jTable10.addMouseListener(new java.awt.event.MouseAdapter() {
+        tbl_setHargaBarang2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTable10MouseClicked(evt);
+                tbl_setHargaBarang2MouseClicked(evt);
             }
         });
-        jTable10.addKeyListener(new java.awt.event.KeyAdapter() {
+        tbl_setHargaBarang2.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                jTable10KeyReleased(evt);
+                tbl_setHargaBarang2KeyReleased(evt);
             }
         });
-        jScrollPane14.setViewportView(jTable10);
+        jScrollPane14.setViewportView(tbl_setHargaBarang2);
 
         jcari.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.gray, java.awt.Color.lightGray, java.awt.Color.lightGray));
         jcari.addActionListener(new java.awt.event.ActionListener() {
@@ -354,11 +362,11 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btsethargaActionPerformed
 
-    private void jTable10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable10MouseClicked
+    private void tbl_setHargaBarang2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2MouseClicked
 
         try {
-            int row = jTable10.getSelectedRow();
-            String table_click = (jTable10.getModel().getValueAt(row, 1).toString());
+            int row = tbl_setHargaBarang2.getSelectedRow();
+            String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
             String sql = "select * from barang where kode_barang='" + table_click + "' ";
             hasil = connection.ambilData(sql);
 //            rs = PS.executeQuery();
@@ -376,9 +384,10 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }//GEN-LAST:event_jTable10MouseClicked
+    }//GEN-LAST:event_tbl_setHargaBarang2MouseClicked
 
     private void harga1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyTyped
+
 
     }//GEN-LAST:event_harga1KeyTyped
 
@@ -414,14 +423,14 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_jcariActionPerformed
 
-    private void jTable10KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTable10KeyReleased
+    private void tbl_setHargaBarang2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2KeyReleased
         switch (evt.getKeyCode()) {
             case KeyEvent.VK_UP:
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_ENTER:
                 try {
-                    int row = jTable10.getSelectedRow();
-                    String table_click = (jTable10.getModel().getValueAt(row, 1).toString());
+                    int row = tbl_setHargaBarang2.getSelectedRow();
+                    String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
                     String sql = "select * from barang where kode_barang='" + table_click + "' ";
                     hasil = connection.ambilData(sql);
 //            rs = PS.executeQuery();
@@ -443,7 +452,11 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             default:
                 break;
         }
-    }//GEN-LAST:event_jTable10KeyReleased
+    }//GEN-LAST:event_tbl_setHargaBarang2KeyReleased
+
+    private void harga1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_harga1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -497,7 +510,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane14;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTable jTable10;
     private javax.swing.JTextField jcari;
+    private javax.swing.JTable tbl_setHargaBarang2;
     // End of variables declaration//GEN-END:variables
 }

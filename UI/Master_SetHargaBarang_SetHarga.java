@@ -7,16 +7,15 @@ package UI;
 
 import Java.Connect;
 import Java.Currency_Column;
-import Java.ListBarang;
-import Java.modelTabelBarang;
-import com.placeholder.PlaceHolder;
+import Java.ListSetBarang;
+import Java.modelTabelSetBarang;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -25,13 +24,15 @@ import javax.swing.table.TableColumnModel;
 public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
 
     private Connect connection;
-    private PreparedStatement PS;
-    private ArrayList<ListBarang> list;
-    private ListBarang listbarang;
     private ResultSet hasil;
-    String kodebrg;
-//    public Master_SetHargaBarang shb = null;
-//    public JTextField harga1, harga2, harga3;
+    private ArrayList<ListSetBarang> list;
+    private ListSetBarang listbarang;
+    private TableModel model;
+    private PreparedStatement PS;
+    String sql, kodebrg;
+    ResultSet rs;
+    private int kode_barang;
+    Master_SetHargaBarang shb;
 
     /**
      * Creates new form NewJFrame
@@ -39,62 +40,58 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
     public Master_SetHargaBarang_SetHarga() {
         initComponents();
         this.setLocationRelativeTo(null);
-
-    }
-    
-    public void setHarga() {
-        Master_SetHargaBarang shb = new Master_SetHargaBarang();
-        shb.sh = this;
-        this.harga1 = (JTextField) getValueAt(shb.harga1);
-        this.harga2 = (JTextField) getValueAt(shb.harga2);
-        this.harga3 = (JTextField) getValueAt(shb.harga3);
-
-    }
-    
-    private void tampilTabel(String param) {
-        String data = "";
-        try {
-            data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
-                    + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
-            hasil = connection.ambilData(data);
-            //System.out.println("sukses query tampil tabel");
-            setModel(hasil);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("ERROR -> " + e.getMessage());
-        } finally {
-//            System.out.println(data);
-        }
     }
 
-    private void setModel(ResultSet hasil) {
-        try {
-            list = new ArrayList<>();
-            int a = 0;
-            while (hasil.next()) {
-                a++;
-                this.listbarang = new ListBarang();
-                this.listbarang.setNo(a);
-                this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
-                this.listbarang.setNama_barang(hasil.getString("nama_barang"));
-                this.listbarang.setHarga_jual_1(hasil.getInt("harga_jual_1_barang"));
-                this.listbarang.setHarga_jual_2(hasil.getInt("harga_jual_2_barang"));
-                this.listbarang.setHarga_jual_3(hasil.getInt("harga_jual_3_barang"));
-                list.add(listbarang);
-                listbarang = null;
-            }
-//            model = new modelTabelBarang(list);
-//            jTable10.setModel(model);
-//            TableColumnModel m = jTable10.getColumnModel();
+    public Master_SetHargaBarang_SetHarga(java.awt.Frame parent, boolean modal) {
+//        super(parent, modal);
+        initComponents();
+        this.connection = new Connect();
+//        tampilTabel("*");
+    }
+
+//    private void tampilTabel(String param) {
+////        System.out.println("yesss");
+//        String data = "";
+//        try {
+//            data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
+//                    + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
+//            hasil = connection.ambilData(data);
+////            System.out.println("sukses query tampil tabel");
+//            setModel(hasil);
+//
+//        } catch (Exception e) {
+//            System.out.println("ERROR -> " + e.getMessage());
+//        } finally {
+////            System.out.println(data);
+//        }
+//    }
+//    private void setModel(ResultSet hasil) {
+//            Master_SetHargaBarang shb = new Master_SetHargaBarang();
+//        try {
+//            list = new ArrayList<>();
+//            int a = 0;
+//            while (hasil.next()) {
+//                a++;
+//                this.listbarang = new ListSetBarang();
+//                this.listbarang.setNomor(a);
+//                this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
+//                this.listbarang.setNama_barang(hasil.getString("nama_barang"));
+//                this.listbarang.setHarga_jual_1_barang(hasil.getInt("harga_jual_1_barang"));
+//                this.listbarang.setHarga_jual_2_barang(hasil.getInt("harga_jual_2_barang"));
+//                this.listbarang.setHarga_jual_3_barang(hasil.getInt("harga_jual_3_barang"));
+//                list.add(listbarang);
+//                listbarang = null;
+//            }
+//            model = new modelTabelSetBarang(list);
+//            shb.tbl_setHargaBarang.setModel(model);
+//            TableColumnModel m = shb.tbl_setHargaBarang.getColumnModel();
 //            m.getColumn(3).setCellRenderer(new Currency_Column());
 //            m.getColumn(4).setCellRenderer(new Currency_Column());
 //            m.getColumn(5).setCellRenderer(new Currency_Column());
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, e);
-        }
-    }
-
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(null, e);
+//        }
+//    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -127,12 +124,6 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
         });
 
         jLabel74.setText("Harga Jual 2");
-
-        harga2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                harga2ActionPerformed(evt);
-            }
-        });
 
         jLabel73.setText("Harga Jual 1");
 
@@ -221,32 +212,61 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_harga3ActionPerformed
 
-    private void btsimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsimpanActionPerformed
-        try {
-            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
-            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
-            p.setString(1, harga1.getText().toString());
-            p.setString(2, harga2.getText().toString());
-            p.setString(3, harga3.getText().toString());
-            p.setString(4, kodebrg);
-//                p.setInt(2, id);
-            p.executeUpdate();
-            tampilTabel("*");
-            System.out.print(p);
-            JOptionPane.showMessageDialog(null, "Data sukses di edit");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }//GEN-LAST:event_btsimpanActionPerformed
-
     private void btcloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btcloseActionPerformed
         this.dispose();
     }//GEN-LAST:event_btcloseActionPerformed
 
-    private void harga2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_harga2ActionPerformed
+    private void btsimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsimpanActionPerformed
+//        model = new modelTabelSetBarang(list);
+//        shb.tbl_setHargaBarang.setModel(model);
+        TableModel model = shb.tbl_setHargaBarang.getModel();
+        int selectedRowIndex = shb.tbl_setHargaBarang.getSelectedRow();
+
+        try {
+            String kode_barang = model.getValueAt(selectedRowIndex, 1).toString();
+            String harga11 = model.getValueAt(selectedRowIndex, 3).toString();
+            String harga22 = model.getValueAt(selectedRowIndex, 4).toString();
+            String harga33 = model.getValueAt(selectedRowIndex, 5).toString();
+
+            String newKode = kode_barang;
+            String newHarga11 = harga1.getText();
+            String newHarga22 = harga2.getText();
+            String newHarga33 = harga3.getText();
+
+            model.setValueAt(newKode, selectedRowIndex, 1);
+            model.setValueAt(newHarga11, selectedRowIndex, 3);
+            model.setValueAt(newHarga22, selectedRowIndex, 4);
+            model.setValueAt(newHarga33, selectedRowIndex, 5);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error");
+        }
+
+//        int i = shb.tbl_setHargaBarang.getSelectedRow();
+//        model = new modelTabelSetBarang(list);
+//        shb.tbl_setHargaBarang.setModel(model);
+//        if(i >= 0){
+//            model.setValueAt(harga1.getText(), i, 3);
+//            model.setValueAt(harga2.getText(), i, 4);
+//            model.setValueAt(harga3.getText(), i, 5);
+//        }else{
+//            JOptionPane.showMessageDialog(null, "Error");
+//        }
+//        shb.setModel(hasil);
+//        try {
+//            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
+//            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
+//            p.setString(1, harga1.getText().toString());
+//            p.setString(2, harga2.getText().toString());
+//            p.setString(3, harga3.getText().toString());
+//            p.setString(4, shb.kodebrg);
+//            p.executeUpdate();
+//            System.out.print(p);
+//            JOptionPane.showMessageDialog(null, "Data sukses di edit");
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+    }//GEN-LAST:event_btsimpanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -405,27 +425,28 @@ public class Master_SetHargaBarang_SetHarga extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Master_SetHargaBarang_SetHarga().setVisible(true);
-                
+                Master_SetHargaBarang_SetHarga frame = new Master_SetHargaBarang_SetHarga(new javax.swing.JFrame(), true);
+                frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                frame.setVisible(true);
             }
-            
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btclose;
     private javax.swing.JButton btsimpan;
-    private javax.swing.JTextField harga1;
-    private javax.swing.JTextField harga2;
-    private javax.swing.JTextField harga3;
+    public javax.swing.JTextField harga1;
+    public javax.swing.JTextField harga2;
+    public javax.swing.JTextField harga3;
     private javax.swing.JLabel jLabel72;
     private javax.swing.JLabel jLabel73;
     private javax.swing.JLabel jLabel74;
     private javax.swing.JLabel jLabel75;
     private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables
-
-    private Object getValueAt(JTextField harga1) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

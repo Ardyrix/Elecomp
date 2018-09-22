@@ -193,6 +193,16 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
         jScrollPane14.setViewportView(tbl_setHargaBarang);
 
         cari.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.gray, java.awt.Color.lightGray, java.awt.Color.lightGray));
+        cari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cariActionPerformed(evt);
+            }
+        });
+        cari.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                cariKeyReleased(evt);
+            }
+        });
 
         jLabel2.setText("Kriteria");
 
@@ -267,7 +277,7 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
         }
     }
 
-    private void setModel(ResultSet hasil) {
+    public void setModel(ResultSet hasil) {
         try {
             list = new ArrayList<>();
             int a = 0;
@@ -319,10 +329,19 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
     }//GEN-LAST:event_harga3KeyPressed
 
     private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
-        Master_SetHargaBarang_SetHarga sh = new Master_SetHargaBarang_SetHarga();
+//        Master_SetHargaBarang_SetHarga sh = new Master_SetHargaBarang_SetHarga();
         sh.setVisible(true);
         sh.setFocusable(true);
-
+        
+//        model = new modelTabelSetBarang(list);
+//        tbl_setHargaBarang.setModel(model);
+//        int selectedRowIndex = tbl_setHargaBarang.getSelectedRow();
+        
+//        sh.harga1.setText(model.getValueAt(selectedRowIndex, 3).toString());
+//        sh.harga2.setText(model.getValueAt(selectedRowIndex, 4).toString());
+//        sh.harga3.setText(model.getValueAt(selectedRowIndex, 5).toString());      
+        
+        
         sh.harga1.setText(harga1.getText());
         sh.harga2.setText(harga2.getText());
         sh.harga3.setText(harga3.getText());
@@ -371,6 +390,14 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
     private void harga1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_harga1ActionPerformed
+
+    private void cariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cariActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cariActionPerformed
+
+    private void cariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cariKeyReleased
+        tampilTabel(cari.getText().toString());
+    }//GEN-LAST:event_cariKeyReleased
 
     /**
      * @param args the command line arguments
