@@ -13,7 +13,16 @@ public class ListSetBarang {
     
     private String nama_barang;
     private int kode_barang,harga_jual_1_barang,harga_jual_2_barang,harga_jual_3_barang, nomor;
-
+    private Boolean select;
+    
+    public Boolean getSelect() {
+        return select;
+    }
+    
+    public void setSelect(Boolean select) {
+        this.select = select;
+    }
+    
     public String getNama_barang() {
         return nama_barang;
     }
