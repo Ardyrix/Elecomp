@@ -385,7 +385,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         };
         p.start();
     }
-    
+
     private int getKodePenjual() {
         int nilai_id = 0;
         try {
@@ -505,7 +505,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 //            JOptionPane.showMessageDialog(null, "Eror" + e);
 //        }
 //    }
-
     private void getHargaJual(int baris) {
         TableModel tabelModel;
         tabelModel = tbl_Penjualan.getModel();
@@ -556,7 +555,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             String sql = "SELECT * FROM barang_konversi bk, konversi k"
                     + " WHERE k.kode_konversi = bk.kode_konversi"
                     + " and bk.kode_barang = " + tmpKodeBarang
-                    + " and k.nama_konversi LIKE '" + tmpNamaKonv + "'";
+                    + " and k.nama_konversi LIKE '%" + tmpNamaKonv + "%'";
 
             java.sql.Connection conn = Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
@@ -649,7 +648,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
     }
 
     private void setData1() {
-        txt_faktur.setText(nofaktur);
+        txt_faktur.setText(no_faktur);
 
         try {
 //             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -670,10 +669,10 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                 comOrder.setSelectedItem("no_faktur_order");
                 txt_faktur.setText(res.getString("no_faktur_penjualan"));
                 comSalesman.setSelectedItem("nama_salesman");
-                comTOP.setSelectedItem("nama_top");
+                comTOP.setSelectedItem("id_top");
                 comStaff.setSelectedItem("staff");
                 txt_keterangan.setText(res.getString("keterangan_penjualan"));
-                
+
             }
 //           
         } catch (SQLException e) {
@@ -684,7 +683,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
     }
 
     private void setData2() {
-        int row = 0; 
+        int row = 0;
         txt_faktur.setText(nofaktur);
         tabel = new DefaultTableModel(new String[]{
             "No", "Kode", "Barang", "Lokasi", "Satuan (1/2/3)", "Jumlah", "J.Harga(1/2/3)", "Harga", "Rekom Harga", "Sub Total"
@@ -694,7 +693,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                     + "from penjualan_detail d, penjualan p, barang b, lokasi l, barang_konversi bs, konversi k "
                     + "where "
                     + "d.kode_barang = b.kode_barang and d.no_faktur_penjualan = p.no_faktur_penjualan and "
-                    + "d.kode_lokasi = l.kode_lokasi and k.kode_konversi = bs.kode_konversi and d.kode_konversi = bs.kode_konversi "
+                    + "b.kode_lokasi = l.kode_lokasi and k.kode_konversi = bs.kode_konversi and d.kode_konversi = bs.kode_konversi "
                     + "order by d.id_penjualan_detail desc";
 //            System.out.println(sql);
             java.sql.Connection conn = Koneksi.configDB();
@@ -705,11 +704,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                 double b = res.getInt("harga_penjualan");
                 int c = res.getInt("jumlah_konversi");
                 double abc = a * b * c;
-//                double dis = res.getInt("discon_persen");
-//                double disrp = res.getInt("discon_rp");
-//                double dis1 = res.getInt("discon2_persen");
-//                double disrp1 = res.getInt("discon2_rp");
-//                double diskon = (dis + dis1) * abc / 100;
                 double harga_jadi = abc;
 
                 tabel.addRow(new Object[]{
@@ -743,7 +737,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             comCustomer.setEnabled(false);
             comOrder.setEnabled(false);
             comTOP.setEnabled(false);
-            comStaff.setEnabled(false);
+//            comStaff.setEnabled(false);
             comSalesman.setEnabled(false);
             txt_keterangan.setEditable(false);
             tbl_Penjualan.setEnabled(false);
@@ -751,7 +745,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             comCustomer.setEnabled(true);
             comOrder.setEnabled(true);
             comTOP.setEnabled(true);
-            comStaff.setEnabled(true);
+//            comStaff.setEnabled(true);
             comSalesman.setEnabled(true);
             txt_keterangan.setEditable(true);
             tbl_Penjualan.setEnabled(true);
@@ -762,7 +756,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         if (param.equals("*")) {
             param = "";
         }
-        if (param.substring(0,1).equals(" ")) {
+        if (param.substring(0, 1).equals(" ")) {
             param = param.substring(1);
         }
         try {
@@ -813,7 +807,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         }
 
     }
-    
+
     public void loadOrder() {
         try {
             String sql = "SELECT * FROM `order` ORDER BY order.no_faktur_order ASC";
@@ -846,7 +840,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         }
 
     }
-    
+
     void loadStaff() {
 
         try {
@@ -867,7 +861,9 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
     void loadSalesman() {
 
         try {
-            String sql = "select * from salesman";
+            String sql = "select s.nama_salesman, c.nama_customer, c.kode_customer from customer c, salesman s "
+                    + "where c.kode_salesman = s.kode_salesman"
+                    + "and c.kode_customer = '" + String.valueOf(comCustomer.getSelectedItem()) + "'";
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
@@ -897,7 +893,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 //        }
 //
 //    }
-
     void loadComTableBarang() {
 //        TableModel tabelModel;
 //        tabelModel = tbl_Penjualan.getModel();
@@ -1002,21 +997,21 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         column = tbl_Penjualan.getColumnModel().getColumn(0);
         column.setPreferredWidth(30);
         column = tbl_Penjualan.getColumnModel().getColumn(1);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(50);
         column = tbl_Penjualan.getColumnModel().getColumn(2);
         column.setPreferredWidth(160);
         column = tbl_Penjualan.getColumnModel().getColumn(3);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(120);
         column = tbl_Penjualan.getColumnModel().getColumn(4);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(50);
         column = tbl_Penjualan.getColumnModel().getColumn(5);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(50);
         column = tbl_Penjualan.getColumnModel().getColumn(6);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(100);
         column = tbl_Penjualan.getColumnModel().getColumn(7);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(100);
         column = tbl_Penjualan.getColumnModel().getColumn(8);
-        column.setPreferredWidth(80);
+        column.setPreferredWidth(100);
         column = tbl_Penjualan.getColumnModel().getColumn(9);
         column.setPreferredWidth(100);
     }
@@ -1282,7 +1277,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 //        }
         if (tbl_Penjualan.getRowCount() >= 1) {
             for (int i = tbl_Penjualan.getRowCount() - 1; i > -1; i--) {
-                int x = Integer.parseInt(tbl_Penjualan.getValueAt(i, 12).toString());
+                int x = Integer.parseInt(tbl_Penjualan.getValueAt(i, 9).toString());
                 subtotalfix += x;
             }
         }
@@ -1531,6 +1526,12 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         jLabel14.setForeground(new java.awt.Color(51, 51, 255));
         jLabel14.setText("Salesman");
 
+        comSalesman.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comSalesmanActionPerformed(evt);
+            }
+        });
+
         jLabel15.setText("T.O.P");
 
         jLabel16.setText("Staff");
@@ -1647,6 +1648,12 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         comCustomer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comCustomerActionPerformed(evt);
+            }
+        });
+
+        comOrder.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comOrderActionPerformed(evt);
             }
         });
 
@@ -2058,7 +2065,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
             tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
             int subtotal = (int) (harga * jumlah * tmppcs);
-            tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 9);
+            tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
 
             HitungSemua();
             if (tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString().equals("0")) {
@@ -2164,23 +2171,23 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 
         loadNumberTable();
 
-    }                                        
+    }
+
     void clear() {
         DefaultTableModel t = (DefaultTableModel) tbl_Penjualan.getModel();
         t.setRowCount(0);
         t.addRow(new Object[]{"", "", "", "", "", "", ""});
-    }
-    private void txt_diskonRpKeyTyped(java.awt.event.KeyEvent evt) {                                      
-        char enter = evt.getKeyChar();
-        if (!(Character.isDigit(enter))) {
-            evt.consume();
-        }
-    }                                     
 
-    private void txt_dpKeyTyped(java.awt.event.KeyEvent evt) {                                
+//    private void txt_diskonRpKeyTyped(java.awt.event.KeyEvent evt) {
+//        char enter = evt.getKeyChar();
+//        if (!(Character.isDigit(enter))) {
+//            evt.consume();
+//        }
+//    }
+//    private void txt_dpKeyTyped(java.awt.event.KeyEvent evt) {
 
     }//GEN-LAST:event_tbl_PenjualanKeyPressed
-    
+
     private int getIdCustomer(String Namacustomer) {
         int id = 0;
         try {
@@ -2266,12 +2273,11 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 //                    + " kode_barang = " + tempK
 //                    + " AND kode_lokasi = " + tempL;
 //            st.executeUpdate(sql);
-
             int totale = Integer.parseInt(txt_tbl_total.getText()) * -1;
-            
+
             SimpleDateFormat format_tanggal = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String date = format_tanggal.format(System.currentTimeMillis());
-            
+
             String sql = "DELETE FROM penjualan "
                     + "WHERE no_faktur_penjualan = '" + txt_faktur.getText() + "'";
 
@@ -2281,7 +2287,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 
             st.executeUpdate(sql);
 
-             sql = "insert into penjualan(no_faktur_penjualan, tgl_penjualan, keterangan_penjualan, status_verifikasi, no_faktur_order , id_top, staff, kode_customer, "
+            sql = "insert into penjualan(no_faktur_penjualan, tgl_penjualan, keterangan_penjualan, status_verifikasi, no_faktur_order , id_top, staff, kode_customer, "
                     + "kode_salesman, kode_pegawai, verifikasi_pegawai, tgl_validasi_penjualan, kode_pegawai_validasi, pembaran_udah_bayar, "
                     + "pembayaran_aktif, potongan, denda_salesman, jumlah_print, print_gudang, print_jalan,"
                     + "no_surat_jalan, tgl_surat_jalan, print_nota_jalan, tgl_nota_jalan, status_toko, tgl_bg_penjualan, "
@@ -2399,10 +2405,14 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
 //
 //        }
     }
-    
+
     private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comCustomerActionPerformed
-try {
-            String sql = "select * from customer where kode_customer = '" + comCustomer.getSelectedItem() + "'";
+        try {
+            String sql = " select c.kode_customer, c.nama_customer, c.alamat_customer, s.nama_salesman "
+                    + " from customer c, salesman s "
+                    + " where c.kode_salesman = s.kode_salesman "
+                    + " and c.kode_customer = '" + comCustomer.getSelectedItem() + "'";
+//            String sql = "select * from customer where kode_customer = '" + comCustomer.getSelectedItem() + "'";
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
@@ -2410,6 +2420,7 @@ try {
                 String nama = res.getString(2);
                 String alamat = res.getString(3);
                 comCustomer.setSelectedItem(res.getString(1));
+                comSalesman.setSelectedItem(res.getString(4));
                 txt_Nama.setText(nama);
                 txt_Alamat.setText(alamat);
             }
@@ -2443,10 +2454,10 @@ try {
                 String kode = res.getString(1);
                 int harga = Math.round(res.getFloat(11));
                 int jumlah = 1;
-                int diskon = 0;
+//                int diskon = 0;
                 loadComTableSatuan();
                 String konv = comTableKonv.getSelectedItem().toString();
-                int diskonp, diskonp2, totaldiskon;
+//                int diskonp, diskonp2, totaldiskon;
                 int jumlah1, harga1, subtotal, totaljadi;
 
                 if (selectedRow != -1) {
@@ -2455,35 +2466,35 @@ try {
                     tbl_Penjualan.setValueAt(konv, selectedRow, 4);
                     tbl_Penjualan.setValueAt(jumlah, selectedRow, 5);
                     tbl_Penjualan.setValueAt(harga, selectedRow, 6);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 8);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 9);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 10);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 11);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 8);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 9);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 10);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 11);
                     tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
 //                    int i = selectedRow;
 //                    konv = comTableKonv.getSelectedItem().toString();
 
                     jumlah1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
                     harga1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
-                    diskonp = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
-                    diskonp2 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
+//                    diskonp = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
+//                    diskonp2 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
                     tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
                     subtotal = (int) (jumlah1 * harga1 * tmppcs);
-                    totaldiskon = ((diskonp + diskonp2) * subtotal / 100);
-                    totaljadi = subtotal - totaldiskon;
-                    tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 7);
-                    tabelModel.setValueAt(totaljadi, tbl_Penjualan.getSelectedRow(), 12);
+//                    totaldiskon = ((diskonp + diskonp2) * subtotal / 100);
+                    totaljadi = subtotal;
+                    tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+                    tabelModel.setValueAt(totaljadi, tbl_Penjualan.getSelectedRow(), 9);
                     Tempharga = res.getInt(11);
                     System.out.println("temharga = " + Tempharga);
 //                    loadComTableSatuan();
 
                 }
                 TableColumnModel m = tbl_Penjualan.getColumnModel();
+//                m.getColumn(5).setCellRenderer(new Currency_Column());
                 m.getColumn(6).setCellRenderer(new Currency_Column());
                 m.getColumn(7).setCellRenderer(new Currency_Column());
+                m.getColumn(8).setCellRenderer(new Currency_Column());
                 m.getColumn(9).setCellRenderer(new Currency_Column());
-                m.getColumn(11).setCellRenderer(new Currency_Column());
-                m.getColumn(12).setCellRenderer(new Currency_Column());
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
@@ -2540,10 +2551,10 @@ try {
                 String kode = res.getString(1);
                 int harga = Math.round(res.getFloat(11));
                 String jumlah = "1";
-                String diskon = "0";
+//                String diskon = "0";
                 loadComTableSatuan();
                 String konv = comTableKonv.getSelectedItem().toString();
-                int diskonp, diskonp2, totaldiskon;
+//                int diskonp, diskonp2, totaldiskon;
                 int jumlah1, harga1, subtotal, totaljadi;
 
                 if (selectedRow != -1) {
@@ -2552,35 +2563,35 @@ try {
                     tbl_Penjualan.setValueAt(konv, selectedRow, 4);
                     tbl_Penjualan.setValueAt(jumlah, selectedRow, 5);
                     tbl_Penjualan.setValueAt(harga, selectedRow, 6);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 8);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 9);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 10);
-                    tbl_Penjualan.setValueAt(diskon, selectedRow, 11);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 8);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 9);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 10);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 11);
                     tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
 //                    int i = selectedRow;
 //                    konv = comTableKonv.getSelectedItem().toString();
 
                     jumlah1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
                     harga1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
-                    diskonp = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
-                    diskonp2 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
+//                    diskonp = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
+//                    diskonp2 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
                     tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
                     subtotal = (int) (jumlah1 * harga1 * tmppcs);
-                    totaldiskon = ((diskonp + diskonp2) * subtotal / 100);
-                    totaljadi = subtotal - totaldiskon;
-                    tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 7);
-                    tabelModel.setValueAt(totaljadi, tbl_Penjualan.getSelectedRow(), 12);
+//                    totaldiskon = ((diskonp + diskonp2) * subtotal / 100);
+                    totaljadi = subtotal;
+                    tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+                    tabelModel.setValueAt(totaljadi, tbl_Penjualan.getSelectedRow(), 9);
                     Tempharga = res.getInt(11);
                     System.out.println("temharga = " + Tempharga);
 //                    loadComTableSatuan();
 
                 }
                 TableColumnModel m = tbl_Penjualan.getColumnModel();
+//                m.getColumn(5).setCellRenderer(new Currency_Column());
                 m.getColumn(6).setCellRenderer(new Currency_Column());
                 m.getColumn(7).setCellRenderer(new Currency_Column());
+                m.getColumn(8).setCellRenderer(new Currency_Column());
                 m.getColumn(9).setCellRenderer(new Currency_Column());
-                m.getColumn(11).setCellRenderer(new Currency_Column());
-                m.getColumn(12).setCellRenderer(new Currency_Column());
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
@@ -2683,7 +2694,7 @@ try {
         };
         SwingUtilities.invokeLater(doHighlight);
     }
-    
+
     private void lbl_SaveMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbl_SaveMouseEntered
         // TODO add your handling code here:
     }//GEN-LAST:event_lbl_SaveMouseEntered
@@ -2735,6 +2746,8 @@ try {
 //        txt_diskonRp.setEditable(false);
         loadCustomer();
         loadTop();
+        loadSalesman();
+        loadStaff();
 //        loadJenisKeuangan();
         loadComTableBarang();
         loadcomTableKode();
@@ -2760,6 +2773,8 @@ try {
         comCustomer.setEnabled(true);
         comOrder.setEnabled(true);
         comTOP.setEnabled(true);
+        comSalesman.setEnabled(true);
+        comStaff.setEnabled(true);
 //        txt_inv.setEditable(true);
 //        tgl_inv.setEnabled(true);
 //        txt_diskon.setEditable(true);
@@ -2769,7 +2784,7 @@ try {
         txt_keterangan.setEditable(true);
         tbl_Penjualan.setEnabled(true);
     }
-    
+
     private void lbl_prevMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbl_prevMouseClicked
 //        boolean isi = false;
 //        do {
@@ -2816,7 +2831,7 @@ try {
         DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
         int selectedRow = tbl_Penjualan.getSelectedRow();
         int baris = tbl_Penjualan.getRowCount();
-        double jumlah = 0, harga = 0, harga_jadi = 0, diskon = 0, diskon1 = 0, diskonp = 0, diskonp1 = 0;
+        double jumlah = 0, harga = 0, harga_jadi = 0;
         int qty = 0;
 
         TableModel tabelModel;
@@ -2828,24 +2843,23 @@ try {
 
             jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
             harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
-            diskon = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
-            diskon1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
-            diskonp = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString());
-            diskonp1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 11).toString());
+//            diskon = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
+//            diskon1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
+//            diskonp = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString());
+//            diskonp1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 11).toString());
             tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
             int subtotal = (int) (jumlah * harga * tmppcs);
-            double diskonrp = subtotal * diskon / 100;
-            double diskonrp1 = subtotal * diskon1 / 100;
-            double hargajadii = subtotal - diskonrp - diskonrp1;
-            tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 7);
-            tabelModel.setValueAt(diskonrp, tbl_Penjualan.getSelectedRow(), 9);
-            tabelModel.setValueAt(diskonrp1, tbl_Penjualan.getSelectedRow(), 11);
-            tabelModel.setValueAt(hargajadii, tbl_Penjualan.getSelectedRow(), 12);
-
+//            double diskonrp = subtotal * diskon / 100;
+//            double diskonrp1 = subtotal * diskon1 / 100;
+            double hargajadii = subtotal;
+            tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+//            tabelModel.setValueAt(diskonrp, tbl_Penjualan.getSelectedRow(), 9);
+//            tabelModel.setValueAt(diskonrp1, tbl_Penjualan.getSelectedRow(), 11);
+            tabelModel.setValueAt(hargajadii, tbl_Penjualan.getSelectedRow(), 9);
 
 //        loadNumberTable();
         }
-            HitungSemua();
+        HitungSemua();
 
     }//GEN-LAST:event_tbl_PenjualanKeyReleased
 
@@ -2950,6 +2964,14 @@ try {
     private void txt_keteranganActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_keteranganActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_keteranganActionPerformed
+
+    private void comSalesmanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comSalesmanActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comSalesmanActionPerformed
+
+    private void comOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comOrderActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comOrderActionPerformed
 
     private int getId_penjualan() {
         int nilai_id = 0;

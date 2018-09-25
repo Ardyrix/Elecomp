@@ -10,6 +10,7 @@ import Java.Currency_Column;
 import Java.ListSetBarang;
 import Java.modelTabelSetBarang;
 import com.placeholder.PlaceHolder;
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import java.awt.event.KeyEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,6 +87,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             while (hasil.next()) {
                 a++;
                 this.listbarang = new ListSetBarang();
+                this.listbarang.setSelect(false);
                 this.listbarang.setNomor(a);
                 this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
                 this.listbarang.setNama_barang(hasil.getString("nama_barang"));
@@ -98,9 +100,9 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             model = new modelTabelSetBarang(list);
             tbl_setHargaBarang2.setModel(model);
             TableColumnModel m = tbl_setHargaBarang2.getColumnModel();
-            m.getColumn(3).setCellRenderer(new Currency_Column());
             m.getColumn(4).setCellRenderer(new Currency_Column());
             m.getColumn(5).setCellRenderer(new Currency_Column());
+            m.getColumn(6).setCellRenderer(new Currency_Column());
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e);
         }
@@ -193,51 +195,59 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
 
         tbl_setHargaBarang2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
+                "", "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         tbl_setHargaBarang2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tbl_setHargaBarang2MouseClicked(evt);
@@ -343,7 +353,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_harga3KeyPressed
 
     private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
-
+//        modelTabelSetBarang.edit();
         try {
             String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
             PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
@@ -363,7 +373,6 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_btsethargaActionPerformed
 
     private void tbl_setHargaBarang2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2MouseClicked
-
         try {
             int row = tbl_setHargaBarang2.getSelectedRow();
             String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
@@ -387,7 +396,6 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_tbl_setHargaBarang2MouseClicked
 
     private void harga1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyTyped
-
 
     }//GEN-LAST:event_harga1KeyTyped
 
@@ -424,34 +432,34 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_jcariActionPerformed
 
     private void tbl_setHargaBarang2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2KeyReleased
-        switch (evt.getKeyCode()) {
-            case KeyEvent.VK_UP:
-            case KeyEvent.VK_DOWN:
-            case KeyEvent.VK_ENTER:
-                try {
-                    int row = tbl_setHargaBarang2.getSelectedRow();
-                    String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
-                    String sql = "select * from barang where kode_barang='" + table_click + "' ";
-                    hasil = connection.ambilData(sql);
-//            rs = PS.executeQuery();
-                    System.out.println("sukses query tampil tabel");
-                    while (hasil.next()) {
-
-                        String add1 = hasil.getString("harga_jual_1_barang");
-                        harga1.setText(add1);
-                        String add2 = hasil.getString("harga_jual_2_barang");
-                        harga2.setText(add2);
-                        String add3 = hasil.getString("harga_jual_3_barang");
-                        harga3.setText(add3);
-                        kodebrg = hasil.getString("kode_barang");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                break;
-        }
+//        switch (evt.getKeyCode()) {
+//            case KeyEvent.VK_UP:
+//            case KeyEvent.VK_DOWN:
+//            case KeyEvent.VK_ENTER:
+//                try {
+//                    int row = tbl_setHargaBarang2.getSelectedRow();
+//                    String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
+//                    String sql = "select * from barang where kode_barang='" + table_click + "' ";
+//                    hasil = connection.ambilData(sql);
+////            rs = PS.executeQuery();
+//                    System.out.println("sukses query tampil tabel");
+//                    while (hasil.next()) {
+//
+//                        String add1 = hasil.getString("harga_jual_1_barang");
+//                        harga1.setText(add1);
+//                        String add2 = hasil.getString("harga_jual_2_barang");
+//                        harga2.setText(add2);
+//                        String add3 = hasil.getString("harga_jual_3_barang");
+//                        harga3.setText(add3);
+//                        kodebrg = hasil.getString("kode_barang");
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                break;
+//            default:
+//                break;
+//        }
     }//GEN-LAST:event_tbl_setHargaBarang2KeyReleased
 
     private void harga1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga1ActionPerformed
