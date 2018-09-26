@@ -10,18 +10,13 @@ import Java.Currency_Column;
 import Java.ListSetBarang;
 import Java.modelTabelSetBarang;
 import com.placeholder.PlaceHolder;
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
-import java.awt.event.KeyEvent;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import javax.swing.RowFilter;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -71,14 +66,14 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             data = "SELECT kode_barang, nama_barang, harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang "
                     + "FROM barang " + (param.equals("*") ? "" : "where nama_barang like '%" + param + "%'");
             hasil = connection.ambilData(data);
-            //System.out.println("sukses query tampil tabel");
+
             setModel(hasil);
 
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("ERROR -> " + e.getMessage());
         } finally {
-//            System.out.println(data);
+
         }
     }
 
@@ -134,9 +129,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                 noKode[jumBarang] = String.valueOf(model.getValueAt(i, 2));
                 jumBarang++;
             } else {
-//                hargaItem1 = 0;
-//                hargaItem2 = 0;
-//                hargaItem3 = 0;
+
             }
         }
         harga1.setText("" + hargaItem1);
@@ -148,11 +141,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                     + " Harga 2 = " + hrgItem2[i] + " Harga 3 = " + hrgItem3[i]);
         }
         System.out.println("=================================");
-//        this.harga1 = harga1;
-//        this.jumFaktur = jumFaktur;
-//        this.totalHutang = totalHutang;
     }
-    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -399,8 +388,6 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_harga3KeyPressed
 
     private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
-//        modelTabelSetBarang.edit();
-//        autoSum();
         try {
             String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
             PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
@@ -408,7 +395,6 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             p.setString(2, harga2.getText().toString());
             p.setString(3, harga3.getText().toString());
             p.setString(4, kodebrg);
-//                p.setInt(2, id);
             p.executeUpdate();
             tampilTabel("*");
             System.out.print(p);
@@ -420,13 +406,11 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_btsethargaActionPerformed
 
     private void tbl_setHargaBarang2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2MouseClicked
-//        autoSum();
         try {
             int row = tbl_setHargaBarang2.getSelectedRow();
             String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 2).toString());
             String sql = "select * from barang where kode_barang='" + table_click + "' ";
             hasil = connection.ambilData(sql);
-//            rs = PS.executeQuery();
             System.out.println("sukses query tampil tabel");
             while (hasil.next()) {
 
@@ -445,23 +429,23 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_tbl_setHargaBarang2MouseClicked
 
     private void harga1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga1KeyTyped
-
+        // TODO add your handling code here:
     }//GEN-LAST:event_harga1KeyTyped
 
     private void harga2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga2KeyTyped
-
+        // TODO add your handling code here:
     }//GEN-LAST:event_harga2KeyTyped
 
     private void harga3KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_harga3KeyTyped
-
+        // TODO add your handling code here:
     }//GEN-LAST:event_harga3KeyTyped
 
     private void harga1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_harga1FocusGained
-
+        // TODO add your handling code here:
     }//GEN-LAST:event_harga1FocusGained
 
     private void harga1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_harga1FocusLost
-
+        // TODO add your handling code here:
     }//GEN-LAST:event_harga1FocusLost
 
     private void jcariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcariKeyReleased
@@ -473,34 +457,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_jcariActionPerformed
 
     private void tbl_setHargaBarang2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2KeyReleased
-//        switch (evt.getKeyCode()) {
-//            case KeyEvent.VK_UP:
-//            case KeyEvent.VK_DOWN:
-//            case KeyEvent.VK_ENTER:
-//                try {
-//                    int row = tbl_setHargaBarang2.getSelectedRow();
-//                    String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
-//                    String sql = "select * from barang where kode_barang='" + table_click + "' ";
-//                    hasil = connection.ambilData(sql);
-////            rs = PS.executeQuery();
-//                    System.out.println("sukses query tampil tabel");
-//                    while (hasil.next()) {
-//
-//                        String add1 = hasil.getString("harga_jual_1_barang");
-//                        harga1.setText(add1);
-//                        String add2 = hasil.getString("harga_jual_2_barang");
-//                        harga2.setText(add2);
-//                        String add3 = hasil.getString("harga_jual_3_barang");
-//                        harga3.setText(add3);
-//                        kodebrg = hasil.getString("kode_barang");
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                break;
-//            default:
-//                break;
-//        }
+        // TODO add your handling code here:
     }//GEN-LAST:event_tbl_setHargaBarang2KeyReleased
 
     private void harga1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_harga1ActionPerformed

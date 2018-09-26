@@ -33,6 +33,8 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
     String sql, kodebrg;
     ResultSet rs;
     private int kode_barang;
+    private String[] noKode;
+    private int[] hrgItem1, hrgItem2, hrgItem3;
     Master_SetHargaBarang_SetHarga sh = new Master_SetHargaBarang_SetHarga();
 
     public Master_SetHargaBarang() {
@@ -140,51 +142,59 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
 
         tbl_setHargaBarang.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
+                "", "No.", "Kode Barang", "Nama", "Harga Jual 1", "Harga Jual 2", "Harga Jual 3"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         tbl_setHargaBarang.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tbl_setHargaBarangMouseClicked(evt);
@@ -284,6 +294,7 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
             while (hasil.next()) {
                 a++;
                 this.listbarang = new ListSetBarang();
+                this.listbarang.setSelect(false);
                 this.listbarang.setNomor(a);
                 this.listbarang.setKode_barang(hasil.getInt("kode_barang"));
                 this.listbarang.setNama_barang(hasil.getString("nama_barang"));
@@ -296,12 +307,50 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
             model = new modelTabelSetBarang(list);
             tbl_setHargaBarang.setModel(model);
             TableColumnModel m = tbl_setHargaBarang.getColumnModel();
-            m.getColumn(3).setCellRenderer(new Currency_Column());
             m.getColumn(4).setCellRenderer(new Currency_Column());
             m.getColumn(5).setCellRenderer(new Currency_Column());
+            m.getColumn(6).setCellRenderer(new Currency_Column());
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e);
         }
+    }
+
+    public void autoSum() {
+        boolean select;
+        int jumBaris = tbl_setHargaBarang.getRowCount();
+        int hargaItem1 = 0;
+        int hargaItem2 = 0;
+        int hargaItem3 = 0;
+        int jumBarang = 0;
+        noKode = new String[jumBaris];
+        hrgItem1 = new int[jumBaris];
+        hrgItem2 = new int[jumBaris];
+        hrgItem3 = new int[jumBaris];
+        model = tbl_setHargaBarang.getModel();
+        for (int i = 0; i < tbl_setHargaBarang.getRowCount(); i++) {
+            select = (boolean) model.getValueAt(i, 0);
+            if (select == true) {
+                hargaItem1 = Integer.valueOf(model.getValueAt(i, 4).toString());
+                hrgItem1[jumBarang] = hargaItem1;
+                hargaItem2 = Integer.valueOf(model.getValueAt(i, 5).toString());
+                hrgItem2[jumBarang] = hargaItem2;
+                hargaItem3 = Integer.valueOf(model.getValueAt(i, 6).toString());
+                hrgItem3[jumBarang] = hargaItem3;
+                noKode[jumBarang] = String.valueOf(model.getValueAt(i, 2));
+                jumBarang++;
+            } else {
+
+            }
+        }
+        harga1.setText("" + hargaItem1);
+        harga2.setText("" + hargaItem2);
+        harga3.setText("" + hargaItem3);
+
+        for (int i = 0; i < jumBarang; i++) {
+            System.out.println("noFaktur " + i + " " + noKode[i] + " Harga 1 = " + hrgItem1[i]
+                    + " Harga 2 = " + hrgItem2[i] + " Harga 3 = " + hrgItem3[i]);
+        }
+        System.out.println("=================================");
     }
 
     private void harga1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_harga1MouseClicked
@@ -332,16 +381,13 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
 //        Master_SetHargaBarang_SetHarga sh = new Master_SetHargaBarang_SetHarga();
         sh.setVisible(true);
         sh.setFocusable(true);
-        
+
 //        model = new modelTabelSetBarang(list);
 //        tbl_setHargaBarang.setModel(model);
 //        int selectedRowIndex = tbl_setHargaBarang.getSelectedRow();
-        
 //        sh.harga1.setText(model.getValueAt(selectedRowIndex, 3).toString());
 //        sh.harga2.setText(model.getValueAt(selectedRowIndex, 4).toString());
 //        sh.harga3.setText(model.getValueAt(selectedRowIndex, 5).toString());      
-        
-        
         sh.harga1.setText(harga1.getText());
         sh.harga2.setText(harga2.getText());
         sh.harga3.setText(harga3.getText());
@@ -367,10 +413,9 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
     private void tbl_setHargaBarangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_setHargaBarangMouseClicked
         try {
             int row = tbl_setHargaBarang.getSelectedRow();
-            String table_click = (tbl_setHargaBarang.getModel().getValueAt(row, 1).toString());
+            String table_click = (tbl_setHargaBarang.getModel().getValueAt(row, 2).toString());
             String sql = "select * from barang where kode_barang='" + table_click + "' ";
             hasil = connection.ambilData(sql);
-//            rs = PS.executeQuery();
             System.out.println("sukses query tampil tabel");
             while (hasil.next()) {
 
@@ -382,6 +427,7 @@ public class Master_SetHargaBarang extends javax.swing.JFrame {
                 harga3.setText(add3);
                 kodebrg = hasil.getString("kode_barang");
             }
+            autoSum();
         } catch (Exception e) {
             e.printStackTrace();
         }
