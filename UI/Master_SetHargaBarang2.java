@@ -38,6 +38,8 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     String sql, kodebrg;
     ResultSet rs;
     private int kode_barang;
+    private String[] noKode;
+    private int[] hrgItem1, hrgItem2, hrgItem3;
 
     public Master_SetHargaBarang2(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -107,6 +109,50 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, e);
         }
     }
+
+    public void autoSum() {
+        boolean select;
+        int jumBaris = tbl_setHargaBarang2.getRowCount();
+        int hargaItem1 = 0;
+        int hargaItem2 = 0;
+        int hargaItem3 = 0;
+        int jumBarang = 0;
+        noKode = new String[jumBaris];
+        hrgItem1 = new int[jumBaris];
+        hrgItem2 = new int[jumBaris];
+        hrgItem3 = new int[jumBaris];
+        model = tbl_setHargaBarang2.getModel();
+        for (int i = 0; i < tbl_setHargaBarang2.getRowCount(); i++) {
+            select = (boolean) model.getValueAt(i, 0);
+            if (select == true) {
+                hargaItem1 = Integer.valueOf(model.getValueAt(i, 4).toString());
+                hrgItem1[jumBarang] = hargaItem1;
+                hargaItem2 = Integer.valueOf(model.getValueAt(i, 5).toString());
+                hrgItem2[jumBarang] = hargaItem2;
+                hargaItem3 = Integer.valueOf(model.getValueAt(i, 6).toString());
+                hrgItem3[jumBarang] = hargaItem3;
+                noKode[jumBarang] = String.valueOf(model.getValueAt(i, 2));
+                jumBarang++;
+            } else {
+//                hargaItem1 = 0;
+//                hargaItem2 = 0;
+//                hargaItem3 = 0;
+            }
+        }
+        harga1.setText("" + hargaItem1);
+        harga2.setText("" + hargaItem2);
+        harga3.setText("" + hargaItem3);
+
+        for (int i = 0; i < jumBarang; i++) {
+            System.out.println("noFaktur " + i + " " + noKode[i] + " Harga 1 = " + hrgItem1[i]
+                    + " Harga 2 = " + hrgItem2[i] + " Harga 3 = " + hrgItem3[i]);
+        }
+        System.out.println("=================================");
+//        this.harga1 = harga1;
+//        this.jumFaktur = jumFaktur;
+//        this.totalHutang = totalHutang;
+    }
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -354,6 +400,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
 
     private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
 //        modelTabelSetBarang.edit();
+//        autoSum();
         try {
             String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
             PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
@@ -373,9 +420,10 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_btsethargaActionPerformed
 
     private void tbl_setHargaBarang2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_setHargaBarang2MouseClicked
+//        autoSum();
         try {
             int row = tbl_setHargaBarang2.getSelectedRow();
-            String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 1).toString());
+            String table_click = (tbl_setHargaBarang2.getModel().getValueAt(row, 2).toString());
             String sql = "select * from barang where kode_barang='" + table_click + "' ";
             hasil = connection.ambilData(sql);
 //            rs = PS.executeQuery();
@@ -390,6 +438,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
                 harga3.setText(add3);
                 kodebrg = hasil.getString("kode_barang");
             }
+            autoSum();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -416,15 +465,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
     }//GEN-LAST:event_harga1FocusLost
 
     private void jcariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcariKeyReleased
-
-//        DefaultTableModel table = (DefaultTableModel) jTable10.getModel();
-//        String Search = jcari.getText().toString();
-//        TableRowSorter<DefaultTableModel> tr = new TableRowSorter<DefaultTableModel>(table);
-//        jTable10.setRowSorter(tr);
-//        tr.setRowFilter(RowFilter.regexFilter(Search));
-//       cari();
         tampilTabel(jcari.getText().toString());
-
     }//GEN-LAST:event_jcariKeyReleased
 
     private void jcariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcariActionPerformed
