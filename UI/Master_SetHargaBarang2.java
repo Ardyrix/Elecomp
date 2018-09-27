@@ -137,7 +137,7 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
         harga3.setText("" + hargaItem3);
 
         for (int i = 0; i < jumBarang; i++) {
-            System.out.println("noFaktur " + i + " " + noKode[i] + " Harga 1 = " + hrgItem1[i]
+            System.out.println("noBarang " + i + " " + noKode[i] + " Harga 1 = " + hrgItem1[i]
                     + " Harga 2 = " + hrgItem2[i] + " Harga 3 = " + hrgItem3[i]);
         }
         System.out.println("=================================");
@@ -389,17 +389,40 @@ public class Master_SetHargaBarang2 extends javax.swing.JDialog {
 
     private void btsethargaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btsethargaActionPerformed
         try {
-            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
-            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
-            p.setString(1, harga1.getText().toString());
-            p.setString(2, harga2.getText().toString());
-            p.setString(3, harga3.getText().toString());
-            p.setString(4, kodebrg);
-            p.executeUpdate();
-            tampilTabel("*");
-            System.out.print(p);
-            JOptionPane.showMessageDialog(null, "Data sukses di edit");
+            boolean select;
 
+            int jml = 0;
+            model = tbl_setHargaBarang2.getModel();
+            for (int i = 0; i < tbl_setHargaBarang2.getRowCount(); i++) {
+                select = (boolean) model.getValueAt(i, 0);
+                if (select == true) {
+                    jml++;
+                } else {
+                }
+            }
+            for (int i = 0; i < jml; i++) {
+                System.out.println("noBarang " + i + " " + noKode[i] + " Harga 1 = " + hrgItem1[i]
+                        + " Harga 2 = " + hrgItem2[i] + " Harga 3 = " + hrgItem3[i]);
+                String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
+
+                PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
+                p.setString(1, harga1.getText().toString());
+                p.setString(2, harga2.getText().toString());
+                p.setString(3, harga3.getText().toString());
+                p.setString(4, noKode[i]);
+                p.executeUpdate();
+                System.out.println(p);
+            }
+//            String sql = "update barang set harga_jual_1_barang=?,harga_jual_2_barang=?,harga_jual_3_barang=? where kode_barang=? ";
+//            PreparedStatement p = (PreparedStatement) connection.Connect().prepareStatement(sql);
+//            p.setString(1, harga1.getText().toString());
+//            p.setString(2, harga2.getText().toString());
+//            p.setString(3, harga3.getText().toString());
+//            p.setString(4, kodebrg);
+//            p.executeUpdate();
+            tampilTabel("*");
+            //           System.out.print(p);
+            JOptionPane.showMessageDialog(null, "Data sukses di edit");
         } catch (Exception e) {
             e.printStackTrace();
         }
