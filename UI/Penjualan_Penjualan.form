@@ -641,7 +641,7 @@
                 <Column editable="true" title="Barang" type="java.lang.Object">
                   <Data value=""/>
                 </Column>
-                <Column editable="false" title="Lokasi" type="java.lang.Object">
+                <Column editable="true" title="Lokasi" type="java.lang.Object">
                   <Data value=""/>
                 </Column>
                 <Column editable="false" title="Satuan (1/2/3)" type="java.lang.Object">
@@ -653,7 +653,7 @@
                 <Column editable="false" title="J.Harga(1/2/3)" type="java.lang.Object">
                   <Data value="0"/>
                 </Column>
-                <Column editable="false" title="Harga" type="java.lang.Object">
+                <Column editable="true" title="Harga" type="java.lang.Object">
                   <Data value="0"/>
                 </Column>
                 <Column editable="true" title="Rekom Harga" type="java.lang.Object">

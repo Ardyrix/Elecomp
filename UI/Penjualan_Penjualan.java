@@ -1565,7 +1565,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, true, true, false, false, true, false, false, true, false
+                false, true, true, true, false, true, false, true, true, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -2838,11 +2838,11 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         tabelModel = tbl_Penjualan.getModel();
         if (tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5) != null && tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5) != "") {
             jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
-            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
+            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 7).toString());
 //        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {    // Membuat Perintah Saat Menekan Enter
 
             jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
-            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
+            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 7).toString());
 //            diskon = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
 //            diskon1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
 //            diskonp = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString());
