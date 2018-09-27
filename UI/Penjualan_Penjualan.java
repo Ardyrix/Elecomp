@@ -668,7 +668,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                 txt_tanggal.setText(res.getString("tgl_penjualan"));
                 comOrder.setSelectedItem("no_faktur_order");
                 txt_faktur.setText(res.getString("no_faktur_penjualan"));
-                comSalesman.setSelectedItem("nama_salesman");
+                comSalesman.setSelectedItem("kode_salesman");
                 comTOP.setSelectedItem("id_top");
                 comStaff.setSelectedItem("staff");
                 txt_keterangan.setText(res.getString("keterangan_penjualan"));
@@ -1107,7 +1107,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             String sql = "SELECT * from penjualan p, customer c, salesman s, top t"
                     + "WHERE p.no_faktur_penjualan = '" + no_faktur + "' "
                     + "AND p.kode_customer = c.kode_customer "
-                    + "AND p.kode_salesman = s.kode_salesman "
+                    + "AND p.kode_salesman = s.nama_salesman "
                     + "AND p.id_top = t.id_top ";
             System.out.println("sql loadform" + sql);
             Connection conn = (Connection) Koneksi.configDB();
@@ -1526,6 +1526,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         jLabel14.setForeground(new java.awt.Color(51, 51, 255));
         jLabel14.setText("Salesman");
 
+        comSalesman.setEditable(true);
         comSalesman.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comSalesmanActionPerformed(evt);
@@ -1958,7 +1959,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             String sql = "select * from lokasi l, barang_lokasi bl, barang b "
                     + "where l.kode_lokasi = bl.kode_lokasi "
                     + "and b.kode_barang = bl.kode_barang "
-                    + "and l.nama_lokasi = '" + comTableLokasi.getSelectedItem().toString() + "' "
+                    + "and l.nama_lokasi = '" + comTableLokasi.getSelectedItem().toString() + " "
                     + "and b.nama_barang = '" + barang + "'";
 //            System.out.println("stl: "+sql);
             java.sql.Connection conn = (Connection) Koneksi.configDB();
