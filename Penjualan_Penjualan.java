@@ -2128,6 +2128,26 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
+            } else if ((evt.getKeyCode() == KeyEvent.VK_1 || evt.getKeyCode() == KeyEvent.VK_NUMPAD1) && tbl_Penjualan.getSelectedColumn() == 6) {
+            System.out.println("ini alt");
+            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
+            try {
+                String sql = "select harga_jual_1_barang from barang b join penjualan_detail d on d.kode_barang ="
+                        + " b.kode_barang where b.id_kelompok = '1' and b.kode_barang = '" + kode_barang + "'";
+                java.sql.Connection conn = (Connection) Koneksi.configDB();
+                java.sql.Statement stm = conn.createStatement();
+                java.sql.ResultSet res = stm.executeQuery(sql);
+                while (res.next()) {
+                    String sat = res.getString("harga_jual_1_barang");
+                    String sat2 = sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
+                    System.out.println(sat2);
+                }
+                res.close();
+                conn.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Eror" + e);
+            }
         } else if ((evt.getKeyCode() == KeyEvent.VK_2 || evt.getKeyCode() == KeyEvent.VK_NUMPAD2) && tbl_Penjualan.getSelectedColumn() == 4) {
             System.out.println("ini alt");
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
@@ -2151,13 +2171,13 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             System.out.println("ini alt");
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
-                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi ="
-                        + " k.kode_konversi where bk.identitas_konversi = '2' and bk.kode_barang = '" + kode_barang + "'";
+                String sql = "select harga_jual_2_barang from barang b join penjualan_detail d on d.kode_barang ="
+                        + " b.kode_barang where b.id_kelompok = '1' and b.kode_barang = '" + kode_barang + "'";
                 java.sql.Connection conn = (Connection) Koneksi.configDB();
                 java.sql.Statement stm = conn.createStatement();
                 java.sql.ResultSet res = stm.executeQuery(sql);
                 while (res.next()) {
-                    String sat = res.getString("nama_konversi");
+                    String sat = res.getString("harga_jual_2_barang");
                     String sat2 = sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
                     System.out.println(sat2);
@@ -2167,25 +2187,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
-        } else if ((evt.getKeyCode() == KeyEvent.VK_1 || evt.getKeyCode() == KeyEvent.VK_NUMPAD1) && tbl_Penjualan.getSelectedColumn() == 6) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '2' and bk.kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String sat = res.getString("nama_konversi");
-                    String sat2 = sat;
-                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
-                    System.out.println(sat2);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
+        
         } else if ((evt.getKeyCode() == KeyEvent.VK_3 || evt.getKeyCode() == KeyEvent.VK_NUMPAD3) && tbl_Penjualan.getSelectedColumn() == 4) {
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
