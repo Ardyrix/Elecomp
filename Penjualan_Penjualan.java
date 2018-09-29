@@ -2197,7 +2197,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                 java.sql.ResultSet res = stm.executeQuery(sql);
                 while (res.next()) {
                     String sat = res.getString("nama_konversi");
-                    String sat2 = "2. " + sat;
+                    String sat2 = sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 4);
                     System.out.println(sat2);
                 }
@@ -2209,13 +2209,14 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
         } else if ((evt.getKeyCode() == KeyEvent.VK_3 || evt.getKeyCode() == KeyEvent.VK_NUMPAD3) && tbl_Penjualan.getSelectedColumn() == 6) {
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
-                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '3' and bk.kode_barang = '" + kode_barang + "'";
+                String sql = "select harga_jual_3_barang from barang b join penjualan_detail d on d.kode_barang ="
+                        + " b.kode_barang where b.id_kelompok = '1' and b.kode_barang = '" + kode_barang + "'";
                 java.sql.Connection conn = (Connection) Koneksi.configDB();
                 java.sql.Statement stm = conn.createStatement();
                 java.sql.ResultSet res = stm.executeQuery(sql);
                 while (res.next()) {
-                    String sat = res.getString("nama_konversi");
-                    String sat2 = "2. " + sat;
+                    String sat = res.getString("harga_jual_3_barang");
+                    String sat2 = sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
                     System.out.println(sat2);
                 }
