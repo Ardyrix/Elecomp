@@ -7,7 +7,6 @@ package UI;
 
 import Class.Koneksi;
 import Java.Connect;
-import Java.Currency_Column;
 import com.sun.glass.events.KeyEvent;
 import java.awt.Frame;
 import java.awt.event.KeyListener;
