@@ -1,13 +1,20 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package UI;
 
 import Class.Koneksi;
-import Java.Connect;
 import Java.Currency_Column;
-import com.sun.glass.events.KeyEvent;
-import java.awt.Frame;
-import java.awt.event.KeyListener;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JOptionPane;
+import javax.swing.table.TableColumn;
+import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,26 +25,18 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
@@ -46,134 +45,71 @@ import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 
 /**
  *
- * @author heruby
+ * @author User
  */
-public class Penjualan_Penjualan extends javax.swing.JFrame {
+public final class Penjualan_Penjualan extends javax.swing.JFrame {
 
-    public String totalclone;
-    public int Tempharga;
-    public int subtotalfix = 0;
-    int kode_barang = 1;
-    String kov;
-    ResultSet rs, rs1, rs2, rsx = null;
-    Connect connection, connection1;
-    private PreparedStatement PS, PSx;
-    public int subtotal1 = 0, hargajadi1 = 0, totalqty = 0, total = 0; //penjumlahan
-    public int hargaRekom = 0, harga = 0, Jharga = 0, subtotal = 0, hargajadi = 0;//panggil colom tabel
-    public int qty = 0;
-    public String tmpLokasi, tmpKonv, tmpKodeBarang, tmpKel;
-    public int tmpIdTOP, tmpKodeLokasi, tmpKodeKonv, jumlah_item;
-    public double tmpHJ1, tmpHJ2, tmpKonvPcs, tmppcs, jmlKonv, jumlahTambah, jmlQty, jumlah_qty;
+    public String totalclone, tempKodeCustom, tmpNamaCustom, tmpLokasi, tmpKonv, tmpKodeBarang, tmpKel;
+    public double Tempharga, tmpHJ1, tmpHJ2, tmpHB, tmpKonvPcs, tmppcs, jmlKonv, jumlahTambah;
+    public double totalBiaya;
+    public int tmpIdTOP, tmpKodeLokasi, tmpKodeKonv, tmpKodeUang;
+    public double jmlQty;
+    public String txtnofaktur;
     private String nofaktur;
-    private DefaultTableModel tabel;
-    private String id, namabarang, kode_satuan;
-    private int tempPrev = 0, jmlKolom = 0, kode_lokasi;
-    private double tempJ, tempJQ, stok, jumlah = 0;
+    private int stok, tempPrev = 0, jmlKolom = 0;
+    private double tempJ, tempJQ;
     private int tempL, tempK;
-    private double tempAJ[], tempAL[];
     private ResultSet tempRs;
+    private DefaultTableModel tabel;
+    private SimpleDateFormat formatTanggal;
+    private String kode_barang;
+    private String no_faktur;
+
     ArrayList<String> kode_nama_arr = new ArrayList();
     ArrayList<String> kode_nama_arr1 = new ArrayList();
-    private String nama_customer;
+    ArrayList<String> kode_nama_arrk = new ArrayList();
     private static int item = 0, item1 = 0, itemk = 0;
     private boolean tampil = true, tampil1 = true, tampilk = true;
     private boolean ini_baru = false, akhir = true;
 
     public Penjualan_Penjualan() {
         initComponents();
-        AturlebarKolom();
-        this.setLocationRelativeTo(null);
-        AutoCompleteDecorator.decorate(comCustomer);
-        AutoCompleteDecorator.decorate(comSalesman);
-        AutoCompleteDecorator.decorate(comStaff);
-        AutoCompleteDecorator.decorate(comOrder);
-//        //AutoCompleteDecorator.decorate(comTableBarang);
-//        AutoCompleteDecorator.decorate(comTableSatuan);
-//        AutoCompleteDecorator.decorate(comTableLokasi);
-//        AutoCompleteDecorator.decorate(comTableHarga);
+        this.setVisible(true);
+//        AutoCompleteDecorator.decorate(comCustomer);
+        //AutoCompleteDecorator.decorate(comTableBarang);
+        AutoCompleteDecorator.decorate(comTableKonv);
+        AutoCompleteDecorator.decorate(comTableLokasi);
+        formatTanggal = new SimpleDateFormat("yyyy-MM-dd");
+//        txt_diskonRp.setEditable(true);
+        TableColumnModel m = tbl_Penjualan.getColumnModel();
+        m.getColumn(6).setCellRenderer(new Currency_Column());
+        m.getColumn(7).setCellRenderer(new Currency_Column());
+        m.getColumn(9).setCellRenderer(new Currency_Column());
         loadCustomer();
-        loadComOrder();
-        loadSalesman();
-        loadStaff();
-        loadTOP();
-        HitungSemua();
-        tanggal_jam_sekarang();
-//        loadComTableBarang();
-//        loadComTableKode();
-        //  loadComTableLokasi();
+        loadTop();
+//        loadJenisKeuangan();
+        loadComTableBarang();
+        loadcomTableKode();
+//        loadComTableLokasi();
         loadNumberTable();
-        //  AturlebarKolom();
+        loadComTableSatuan();
+        loadComTableLokasi();
+        loadOrder();
+        tanggal_jam_sekarang();
         autonumber();
+        AturlebarKolom();
+//        HitungSemua();
+        uangtotal();
+        uangdp();
         comCustomer.requestFocus();
-        //loadComSatuanBarang();
-        //JCombobox kode barang
-        ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                System.out.println("insert");
-
-                if (item == 0) {
-                    loadComboKode(((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText());
-                } else {
-                    item = 0;
-                }
-                Runnable doHighlight = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (tampil) {
-//                            tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 1);
-                            comTableKode.setPopupVisible(true);
-                        }
-
-                    }
-                };
-                SwingUtilities.invokeLater(doHighlight);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                System.out.println("remove");
-                System.out.println(((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText());
-                String key = ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText();
-                System.out.println(key);
-//                ((JTextComponent) comTableKode.getEditor().getEditorComponent()).setText(key);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                System.out.println("change");
-            }
-        });
-        ((JTextComponent) comTableKode.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(java.awt.event.KeyEvent e) {
-
-            }
-
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                tampil = true;
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tampil = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    tampil = true;
-                }
-            }
-
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
-
-            }
-        });
-
-        //JCombobox nama barang
+        //JCombobox Nama barang
         ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 System.out.println("insert");
 
                 if (item == 0) {
-                    loadComboBarang(((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText());
+                    loadComboNama(((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText());
                 } else {
                     item = 0;
                 }
@@ -181,7 +117,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                     @Override
                     public void run() {
                         if (tampil) {
-                            tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 2);
+                            //tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 2);
                             comTableBarang.setPopupVisible(true);
                         }
 
@@ -196,13 +132,15 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                 System.out.println(((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText());
                 String key = ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText();
                 System.out.println(key);
-                //   ((JTextComponent) comTableKode.getEditor().getEditorComponent()).setText(key);
+                //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
                 System.out.println("change");
+
             }
+
         });
         ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
             @Override
@@ -225,6 +163,68 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
             }
         });
+        //JCombobox Kode barang
+        ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                System.out.println("insert");
+
+                if (itemk == 0) {
+                    loadComboKode(((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText());
+                } else {
+                    itemk = 0;
+                }
+                Runnable doHighlight = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (tampilk) {
+                            //tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 2);
+                            comTableKode.setPopupVisible(true);
+                        }
+
+                    }
+                };
+                SwingUtilities.invokeLater(doHighlight);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                System.out.println("remove");
+                System.out.println(((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText());
+                String key = ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText();
+                System.out.println(key);
+                //((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                System.out.println("change");
+
+            }
+
+        });
+        ((JTextComponent) comTableKode.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(java.awt.event.KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                tampilk = true;
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    tampilk = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    tampilk = true;
+                }
+            }
+
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+
+            }
+        });
+        //JCombobox customer
         ((JTextComponent) comCustomer.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -239,7 +239,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                     @Override
                     public void run() {
                         if (tampil1) {
-                            //tbl_Pembelian.editCellAt(tbl_Pembelian.getSelectedRow(), 2);
+                            //tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 2);
                             comCustomer.setPopupVisible(true);
                         }
 
@@ -285,416 +285,819 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
             }
         });
-        
-
     }
 
-    public Penjualan_Penjualan(String tanggal, String transaksi) {
+    public Penjualan_Penjualan(String data, boolean cb) {
         initComponents();
-        AturlebarKolom();
-        this.setLocationRelativeTo(null);
+        this.setVisible(true);
         AutoCompleteDecorator.decorate(comCustomer);
-        AutoCompleteDecorator.decorate(comSalesman);
-        AutoCompleteDecorator.decorate(comStaff);
-        AutoCompleteDecorator.decorate(comOrder);
-//        //AutoCompleteDecorator.decorate(comTableBarang);
-//        AutoCompleteDecorator.decorate(comTableSatuan);
-//        AutoCompleteDecorator.decorate(comTableLokasi);
-//        AutoCompleteDecorator.decorate(comTableHarga);
+        AutoCompleteDecorator.decorate(comTableBarang);
+        AutoCompleteDecorator.decorate(comTableKonv);
+        AutoCompleteDecorator.decorate(comTableLokasi);
         loadCustomer();
-        loadComOrder();
-        loadSalesman();
-        loadStaff();
-        loadTOP();
-        HitungSemua();
-        tanggal_jam_sekarang();
-//        loadComTableBarang();
-//        loadComTableKode();
-        //  loadComTableLokasi();
+        loadComTableBarang();
+        loadComTableLokasi();
+        loadComTableSatuan();
         loadNumberTable();
-        //  AturlebarKolom();
+        loadOrder();
+//        tanggal_jam_sekarang();
+        AturlebarKolom();
+        this.nofaktur = data;
+        setData1();
+        setData2();
         autonumber();
-
-        //JCombobox kode barang
-        ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                System.out.println("insert");
-
-                if (item == 0) {
-                    loadComboKode(((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText());
-                } else {
-                    item = 0;
-                }
-                Runnable doHighlight = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (tampil) {
-                            tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 1);
-                            comTableKode.setPopupVisible(true);
-                        }
-
-                    }
-                };
-                SwingUtilities.invokeLater(doHighlight);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                System.out.println("remove");
-                System.out.println(((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText());
-                String key = ((JTextComponent) comTableKode.getEditor().getEditorComponent()).getText();
-                System.out.println(key);
-//                ((JTextComponent) comTableKode.getEditor().getEditorComponent()).setText(key);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                System.out.println("change");
-            }
-        });
-        ((JTextComponent) comTableKode.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(java.awt.event.KeyEvent e) {
-
-            }
-
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                tampil = true;
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tampil = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    tampil = true;
-                }
-            }
-
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
-
-            }
-        });
-
-        //JCombobox nama barang
-        ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                System.out.println("insert");
-
-                if (item == 0) {
-                    loadComboBarang(((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText());
-                } else {
-                    item = 0;
-                }
-                Runnable doHighlight = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (tampil) {
-                            tbl_Penjualan.editCellAt(tbl_Penjualan.getSelectedRow(), 2);
-                            comTableBarang.setPopupVisible(true);
-                        }
-
-                    }
-                };
-                SwingUtilities.invokeLater(doHighlight);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                System.out.println("remove");
-                System.out.println(((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText());
-                String key = ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).getText();
-                System.out.println(key);
-                //   ((JTextComponent) comTableKode.getEditor().getEditorComponent()).setText(key);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                System.out.println("change");
-            }
-        });
-        ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(java.awt.event.KeyEvent e) {
-
-            }
-
-            @Override
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                tampil = true;
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tampil = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    tampil = true;
-                }
-            }
-
-            @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
-
-            }
-        });
-        
-
+        HitungSemua();
+        uangtotal();
+//        uangdp();
+        if (!cb) {
+//            txt_inv.setEditable(false);
+//            tgl_inv.setEnabled(false);
+//            txt_diskon.setEditable(false);
+//            txt_diskonRp.setEditable(false);
+            comCustomer.setEnabled(false);
+            txt_keterangan.setEditable(false);
+            tbl_Penjualan.setEnabled(false);
+//            txt_dp.setEnabled(false);
+//             HitungSemua();
+        }
     }
 
-    public Penjualan_Penjualan(java.awt.Frame parent, boolean modal, Connect connection) {
-        //   super(parent, modal, connection);
+    public Penjualan_Penjualan(String data, String no_faktur) {
         initComponents();
-
+        this.setVisible(true);
+        AutoCompleteDecorator.decorate(comCustomer);
+        AutoCompleteDecorator.decorate(comTableBarang);
+        AutoCompleteDecorator.decorate(comTableKonv);
+        AutoCompleteDecorator.decorate(comTableLokasi);
+        loadCustomer();
+        loadComTableBarang();
+        loadComTableLokasi();
+        loadComTableSatuan();
+        loadNumberTable();
+        loadOrder();
+//        tanggal_jam_sekarang();
+        AturlebarKolom();
+        this.nofaktur = data;
+        setData1();
+        setData2();
+        autonumber();
+        HitungSemua();
+        uangtotal();
+//        uangdp();
+        if (no_faktur == "") {
+//            txt_inv.setEditable(false);
+//            tgl_inv.setEnabled(false);
+//            txt_diskon.setEditable(false);
+//            txt_diskonRp.setEditable(false);
+            comCustomer.setEnabled(false);
+            txt_keterangan.setEditable(false);
+            tbl_Penjualan.setEnabled(false);
+//            txt_dp.setEnabled(false);
+//             HitungSemua();
+        }
     }
 
-    void loadComboKode(final String key) {
-        Runnable doHighlight = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("ini load combo kode");
-                try {
-                    String sql = "select concat(kode_barang,\"-\",nama_barang) as gabung from barang where kode_barang ='" + key + "' "
-                            + "OR nama_barang like '%" + key + "%'";
-                    //String sql = "select concat(kode_barang,\"-\",nama_barang) as gabung from barang";
-                    System.out.println(sql);
-                    java.sql.Connection conn = (Connection) Koneksi.configDB();
-                    java.sql.Statement stm = conn.createStatement();
-                    java.sql.ResultSet res = stm.executeQuery(sql);
-                    System.out.println("ini sql com kode nama " + sql);
-                    kode_nama_arr.clear();
-                    kode_nama_arr.add("");
-                    while (res.next()) {
-                        String gabung = res.getString("gabung");
-                        kode_nama_arr.add(gabung);
-                        item++;
-                    }
-                    if (item == 0) {
-                        item = 1;
-                    }
-                    //comKodeBarang.setSelectedIndex(-1);
-                    comTableKode.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
-                    ((JTextComponent) comTableKode.getEditor().getEditorComponent()).setText(key);
-                    conn.close();
-                    res.close();
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Eror" + e);
-                    e.printStackTrace();
-                }
+    private String currency_convert(int nilai) {
+        DecimalFormat kursIndonesia = (DecimalFormat) DecimalFormat.getCurrencyInstance();
+        DecimalFormatSymbols formatRp = new DecimalFormatSymbols();
+        formatRp.setCurrencySymbol("Rp. ");
+        formatRp.setMonetaryDecimalSeparator(',');
+        formatRp.setGroupingSeparator('.');
+        kursIndonesia.setDecimalFormatSymbols(formatRp);
+        return kursIndonesia.format(nilai);
+    }
 
+    private void tanggalsekarang() {
+        Thread p = new Thread() {
+            public void run() {
+                for (;;) {
+                    GregorianCalendar cal = new GregorianCalendar();
+                    int hari = cal.get(Calendar.DAY_OF_MONTH);
+                    int bulan = cal.get(Calendar.MONTH);
+                    int tahun = cal.get(Calendar.YEAR);
+                    int jam = cal.get(Calendar.HOUR_OF_DAY);
+                    int menit = cal.get(Calendar.MINUTE);
+                    int detik = cal.get(Calendar.SECOND);
+                    txt_tanggal.setText(tahun + "-" + (bulan + 1) + "-" + hari + " " + jam + ":" + menit + ":" + detik);
+
+                }
             }
         };
-        SwingUtilities.invokeLater(doHighlight);
+        p.start();
     }
 
-    void loadComboBarang(final String key) {
-        Runnable doHighlight = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("ini load combo nama");
-                try {
-                    String sql = "select concat(kode_barang,\"-\",nama_barang) as gabung from barang where kode_barang ='" + key + "' "
-                            + "OR nama_barang like '%" + key + "%'";
-                    //String sql = "select concat(kode_barang,\"-\",nama_barang) as gabung from barang";
-                    System.out.println(sql);
-                    java.sql.Connection conn = (Connection) Koneksi.configDB();
-                    java.sql.Statement stm = conn.createStatement();
-                    java.sql.ResultSet res = stm.executeQuery(sql);
-                    System.out.println("ini sql com kode nama " + sql);
-                    kode_nama_arr.clear();
-                    kode_nama_arr.add("");
-                    while (res.next()) {
-                        String gabung = res.getString("gabung");
-                        kode_nama_arr.add(gabung);
-                        item++;
-                    }
-                    if (item == 0) {
-                        item = 1;
-                    }
-                    //comKodeBarang.setSelectedIndex(-1);
-                    comTableBarang.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
-                    ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
-                    conn.close();
-                    res.close();
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Eror" + e);
-                    e.printStackTrace();
-                }
-
-            }
-        };
-        SwingUtilities.invokeLater(doHighlight);
-    }
-
-    void load_dari_kode_barang() {
-
-        int selectedRow = tbl_Penjualan.getSelectedRow();
-        String nama_awal = String.valueOf(comTableKode.getSelectedItem().toString());
-        String[] split = comTableKode.getSelectedItem().toString().split(" - ");
-        System.out.println("nilai comTable barang adalah " + comTableKode.getSelectedItem());
-        if (comTableKode.getSelectedItem() != null) {
-            split = nama_awal.split("-");
-
-        }
-        for (int i = 0; i < split.length; i++) {
-            System.out.println("ini split " + split[i]);
-        }
+    private int getKodePenjual() {
+        int nilai_id = 0;
         try {
-//            String sql = "select kode_barang,nama_barang,harga_jual_2_barang from barang where kode_barang = '" + split[0] + "'";
-            String sql = "select b.kode_barang, b.nama_barang, b.harga_jual_1_barang, "
-                    + "b.harga_jual_2_barang, b.harga_jual_3_barang, b.harga_rata_rata_barang, "
-                    + "bl.jumlah from barang b, barang_lokasi bl, lokasi l where b.kode_barang = bl.kode_barang and "
-                    + "bl.kode_lokasi = l.kode_lokasi and l.nama_lokasi='toko' and b.kode_barang = '" + split[0].trim() + "' "
-                    + "and bl.kode_lokasi=4";
-            System.out.println("jumlahhhh: " + sql);
+            String sql = "SELECT MAX(id_penjualan) FROM penjualan";
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
+
+//            System.out.println("test =" +sql);
+//            System.out.println("k =" +kode_barang);
+//            System.out.println("Select =" + comTableKonv.getSelectedItem());
             while (res.next()) {
-                String id = res.getString(1);
-                String namabarang = res.getString(2);
-                harga = res.getInt(4);
-                jumlah = res.getInt(7);
-                this.kode_barang = Integer.parseInt(id);
-                loadNumberTable();
-//                loadHargaSatuanBarang();
+                nilai_id = res.getInt(1);
+                System.out.println("Nilai_id =" + ++nilai_id);
+//                System.out.println("echo : " + tbl_Penjualan.getValueAt(selectedRow, 2).toString());
 
-                //String konv = comSatuan.getSelectedItem().toString();
-                // String kode_strip = kode + "-" + nama;
-                if (selectedRow != -1) {
-                    System.out.println("idddddddddddddddddddddddddd");
-                    loadComTableLokasi();
-//                  comTableAsal.getItemAt(0);
-
-                    //loadComSatuanBarang(String.valueOf(kode_barang));
-                    loadComTableSatuan();
-                    //tbl_Penjualan.setValueAt(comSatuan.getItemAt(0), selectedRow, 3);
-                    tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
-                    tbl_Penjualan.setValueAt(comTableKonv.getItemAt(0), selectedRow, 4);
-                    tbl_Penjualan.setValueAt(kode_barang, selectedRow, 1);
-                    tbl_Penjualan.setValueAt(namabarang, selectedRow, 2);
-                    tbl_Penjualan.setValueAt(0, selectedRow, 5);
-                    tbl_Penjualan.setValueAt(harga, selectedRow, 6);
-                    tbl_Penjualan.setValueAt(harga, selectedRow, 8);
-//                    System.out.println("harga: "+harga);
-                    tbl_Penjualan.setValueAt(harga, selectedRow, 7);
-//                    System.out.println(jumlah);
-
-                }
-//                loadComSatuanBarang(tbl_Penjualan.getValueAt(selectedRow, 1).toString());
-//                tbl_Penjualan.setValueAt(comSatuan.getSelectedItem(), selectedRow, 3);
             }
-            conn.close();
-            res.close();
+            return nilai_id + 1;
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
+            JOptionPane.showMessageDialog(null, "Eror nyaaaaa: ");
             e.printStackTrace();
         }
+
+        return 0;
     }
 
-    void load_dari_nama_barang() {
-        int selectedRow = tbl_Penjualan.getSelectedRow();
-        String nama_awal = String.valueOf(comTableBarang.getSelectedItem());
-        String[] split = new String[2];
-        System.out.println("nilai comTable barang adalah " + comTableBarang.getSelectedItem());
-        if (comTableBarang.getSelectedItem() != null) {
-            split = nama_awal.split("-");
-        }
+    private void getKodeCustom() {
+        tmpNamaCustom = txt_Nama.getText();
         try {
-            String sql = "select b.kode_barang, b.nama_barang, b.harga_jual_1_barang, "
-                    + "b.harga_jual_2_barang, b.harga_jual_3_barang, b.harga_rata_rata_barang, "
-                    + "bl.jumlah from barang b, barang_lokasi bl, lokasi l where b.kode_barang = bl.kode_barang and "
-                    + "bl.kode_lokasi = l.kode_lokasi and l.nama_lokasi='toko' and b.kode_barang = '" + split[0] + "' "
-                    + "and bl.kode_lokasi=4";
-            System.out.println("jumlahhhh: " + sql);
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
+
+            String sql = "SELECT * FROM `customer` WHERE nama_customer LIKE '" + tmpNamaCustom + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
-                String id = res.getString(1);
-                String namabarang = res.getString(2);
-                harga = res.getInt(4);
-                jumlah = res.getInt(7);
-                this.kode_barang = Integer.parseInt(id);
-                loadNumberTable();
-                // loadComSatuanBarang(namabarang);
-//                loadHargaSatuanBarang();
-                loadComTableLokasi();
-                //String konv = comSatuan.getSelectedItem().toString();
-
-                // String kode_strip = kode + "-" + nama;
-                if (selectedRow != -1) {
-                    System.out.println("idddddddddddddddddddddddddd");
-//                    comTableAsal.getItemAt(0);
-                    //   loadComSatuanBarang(String.valueOf(kode_barang));
-                    //tbl_Penjualan.setValueAt(comSatuan.getItemAt(0), selectedRow, 3);
-                    loadComTableSatuan();
-                    tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
-                    tbl_Penjualan.setValueAt(comTableKonv.getItemAt(0), selectedRow, 4);
-                    tbl_Penjualan.setValueAt(kode_barang, selectedRow, 1);
-                    tbl_Penjualan.setValueAt(namabarang, selectedRow, 2);
-                    tbl_Penjualan.setValueAt(0, selectedRow, 5);
-                    tbl_Penjualan.setValueAt(harga, selectedRow, 6);
-//                    tbl_Penjualan.setValueAt(harga, selectedRow, 8);
-//                    System.out.println("harga: "+harga);
-                    tbl_Penjualan.setValueAt(harga, selectedRow, 7);
-//                    System.out.println(jumlah);
-
-                }
-//                loadComSatuanBarang(tbl_Penjualan.getValueAt(selectedRow, 1).toString());
-//                tbl_Penjualan.setValueAt(comSatuan.getSelectedItem(), selectedRow, 3);
+                tempKodeCustom = res.getString("kode_customer");
             }
-            conn.close();
-            res.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
-            e.printStackTrace();
         }
     }
 
-    void hapustabel() {
-        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
-        for (int i = tbl_Penjualan.getRowCount() - 1; i > -1; i--) {
-            model.removeRow(i);
+    private int getKodeTOP() {
+        String tmpTOP = comTOP.getSelectedItem().toString();
+        try {
 
+            String sql = "SELECT * FROM `top` WHERE nama_top LIKE '" + tmpTOP + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpIdTOP = res.getInt("id_top");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
         }
+        return tmpIdTOP;
     }
 
-    private void loadTable(String no_faktur) {
-        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+    private int getKodeLokasi(int baris) {
         TableModel tabelModel;
         tabelModel = tbl_Penjualan.getModel();
+        tmpLokasi = tbl_Penjualan.getValueAt(baris, 3).toString();
         try {
-            hapustabel();
-            String sql = "SELECT * FROM penjualan_detail pd, lokasi l, konversi k, penjualan p"
-                    + "WHERE pd.kode_konversi = k.kode_konversi "
-                    + "AND pd.kode_lokasi = l.kode_lokasi "
-                    + "AND pd.no_faktur_penjualan = '" + no_faktur + "'"
-                    + "AND pd.no_faktur_penjualan = p.no_faktur_penjualan";
+
+            String sql = "SELECT * FROM `lokasi` WHERE nama_lokasi LIKE '" + tmpLokasi + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpKodeLokasi = res.getInt("kode_lokasi");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+        return tmpKodeLokasi;
+    }
+
+    private int getKodeKonv(int baris) {
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        tmpKonv = tbl_Penjualan.getValueAt(baris, 4).toString();
+        try {
+
+            String sql = "SELECT * FROM `konversi` WHERE nama_konversi LIKE '" + tmpKonv + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpKodeKonv = res.getInt("kode_konversi");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+        return tmpKodeKonv;
+    }
+
+//    private void getKodeUang() {
+//        TableModel tabelModel;
+//        tabelModel = tbl_Penjualan.getModel();
+//        try {
+//
+//            String sql = "SELECT * FROM `transaksi_nama_keuangan` WHERE nama_keuangan LIKE '" + com_jenisKeuangan.getSelectedItem().toString() + "'";
+//
+//            java.sql.Connection conn = Koneksi.configDB();
+//            java.sql.Statement stm = conn.createStatement();
+//            java.sql.ResultSet res = stm.executeQuery(sql);
+//            while (res.next()) {
+//                tmpKodeUang = res.getInt("kode_nama_keuangan");
+//            }
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(null, "Eror" + e);
+//        }
+//    }
+    private void getHargaJual(int baris) {
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
+        try {
+
+            String sql = "SELECT * FROM `barang` WHERE kode_barang LIKE '" + tmpKodeBarang + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpHJ1 = res.getInt("harga_jual_1_barang");
+                tmpHJ2 = res.getInt("harga_jual_2_barang");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+    }
+
+    private double getHargaBeli(int baris) {
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
+        try {
+
+            String sql = "SELECT * FROM `barang` WHERE kode_barang LIKE '" + tmpKodeBarang + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpHB = res.getDouble("harga_beli");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+        return tmpHB;
+    }
+
+    private double getKonvPcs(int baris) {
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        String tmpNamaKonv = tbl_Penjualan.getValueAt(baris, 4).toString();
+        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
+        try {
+
+            String sql = "SELECT * FROM barang_konversi bk, konversi k"
+                    + " WHERE k.kode_konversi = bk.kode_konversi"
+                    + " and bk.kode_barang = " + tmpKodeBarang
+                    + " and k.nama_konversi LIKE '%" + tmpNamaKonv + "%'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpKonvPcs = res.getDouble("bk.jumlah_konversi");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+        return tmpKonvPcs;
+    }
+
+    private void getQtyTambah(int baris) {
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        int tmpJumlah = Integer.parseInt(tbl_Penjualan.getValueAt(baris, 5).toString());
+        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
+        double tmpJmlKonv = getKonvPcs(baris);
+        try {
+
+            String sql = "SELECT * FROM barang"
+                    + " WHERE kode_barang = " + tmpKodeBarang;
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                tmpKel = res.getString("id_kelompok");
+            }
+            jmlKonv = tmpJmlKonv;
+            jumlahTambah = tmpJumlah * jmlKonv;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+    }
+
+    private void getQty(int baris) {
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
+        try {
+
+            String sql = "SELECT * FROM barang_lokasi WHERE"
+                    + " kode_barang = '" + tmpKodeBarang + "'"
+                    + " AND kode_lokasi = " + getKodeLokasi(baris);
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                jmlQty = res.getDouble("jumlah");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+    }
+
+    private void getQtyTambahTemp(String noFaktur) {
+
+        try {
+
+            String sql = "SELECT * FROM penjualan_detail dp, barang_lokasi bl WHERE"
+                    + " dp.kode_barang = bl.kode_barang AND"
+                    + " dp.kode_lokasi = bl.kode_lokasi AND"
+                    + " no_faktur_penjualan = '" + noFaktur + "'";
+
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+
+            while (res.next()) {
+                tempK = res.getInt("kode_barang");
+                tempL = res.getInt("kode_lokasi");
+                tempJ = res.getDouble("jumlah_barang");
+                tempJQ = res.getDouble("jumlah");
+                System.out.println("Kode barang = " + tempK + ", Kode Lokasi = " + tempL + ", Jumlah = " + tempJ);
+
+                sql = "UPDATE barang_lokasi SET"
+                        + " jumlah = " + (tempJQ - tempJ)
+                        + " WHERE"
+                        + " kode_barang = " + tempK
+                        + " AND kode_lokasi = " + tempL;
+                java.sql.Statement st = conn.createStatement();
+                st.executeUpdate(sql);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+    }
+
+    private void setData1() {
+        txt_faktur.setText(no_faktur);
+
+        try {
+//             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            String sql = "SELECT * from penjualan p, customer c, salesman s, top t"
+                    + "WHERE p.no_faktur_penjualan = '" + no_faktur + "' "
+                    + "AND p.kode_customer = c.kode_customer "
+                    + "AND p.kode_salesman = s.kode_salesman "
+                    + "AND p.id_top = t.id_top ";
+//            System.out.println("aaaa: " + sql);
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                txt_Nama.setText(res.getString("nama_customer"));
+                txt_Alamat.setText(res.getString("alamat_customer"));
+                txt_tanggal.setText(res.getString("tgl_penjualan"));
+                comOrder.setSelectedItem("no_faktur_order");
+                txt_faktur.setText(res.getString("no_faktur_penjualan"));
+                comSalesman.setSelectedItem("kode_salesman");
+                comTOP.setSelectedItem("id_top");
+                comStaff.setSelectedItem("staff");
+                txt_keterangan.setText(res.getString("keterangan_penjualan"));
+
+            }
+//           
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+//        } catch (ParseException ex) {
+//            Logger.getLogger(Penjualan_Penjualan.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void setData2() {
+        int row = 0;
+        txt_faktur.setText(nofaktur);
+        tabel = new DefaultTableModel(new String[]{
+            "No", "Kode", "Barang", "Lokasi", "Satuan (1/2/3)", "Jumlah", "J.Harga(1/2/3)", "Harga", "Rekom Harga", "Sub Total"
+        }, 0);
+        try {
+            String sql = "select * "
+                    + "from penjualan_detail d, penjualan p, barang b, lokasi l, barang_konversi bs, konversi k "
+                    + "where "
+                    + "d.kode_barang = b.kode_barang and d.no_faktur_penjualan = p.no_faktur_penjualan and "
+                    + "b.kode_lokasi = l.kode_lokasi and k.kode_konversi = bs.kode_konversi and d.kode_konversi = bs.kode_konversi "
+                    + "order by d.id_penjualan_detail desc";
+//            System.out.println(sql);
+            java.sql.Connection conn = Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                double a = res.getInt("jumlah_barang");
+                double b = res.getInt("harga_penjualan");
+                int c = res.getInt("jumlah_konversi");
+                double abc = a * b * c;
+                double harga_jadi = abc;
+
+                tabel.addRow(new Object[]{
+                    res.getInt("kode_penjualan"),
+                    res.getString("kode_barang"),
+                    res.getString("nama_barang"),
+                    res.getString("nama_lokasi"),
+                    res.getString("nama_konversi"),
+                    res.getInt("jumlah_barang"),
+                    res.getInt("harga_penjualan"),
+                    res.getInt("harga_jual"),
+                    res.getInt("harga_revisi"),
+                    harga_jadi
+                });
+            }
+        } catch (SQLException e) {
+
+        } finally {
+            tbl_Penjualan.setModel(tabel);
+        }
+    }
+
+    private void editable() throws ParseException {
+
+        String string = "2018-07-30 17:00:00";
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        Date date = new Date();
+        Date date2 = format.parse(string);
+
+        if (date.after(date2)) {
+            comCustomer.setEnabled(false);
+            comOrder.setEnabled(false);
+            comTOP.setEnabled(false);
+//            comStaff.setEnabled(false);
+            comSalesman.setEnabled(false);
+            txt_keterangan.setEditable(false);
+            tbl_Penjualan.setEnabled(false);
+        } else {
+            comCustomer.setEnabled(true);
+            comOrder.setEnabled(true);
+            comTOP.setEnabled(true);
+//            comStaff.setEnabled(true);
+            comSalesman.setEnabled(true);
+            txt_keterangan.setEditable(true);
+            tbl_Penjualan.setEnabled(true);
+        }
+    }
+
+    void loadCustomer(String param) {
+        if (param.equals("*")) {
+            param = "";
+        }
+        if (param.substring(0, 1).equals(" ")) {
+            param = param.substring(1);
+        }
+        try {
+//            String sql = "select * from customer where nama_customer like '%"+param+"%' or kode_customer like '%"+param+"%'";
+            String sql = "select concat(kode_customer,\" - \",nama_customer) as gabung from customer "
+                    + "where kode_customer ='" + param + "' OR nama_customer like '%" + param + "%'";
+//            System.out.println("sql: " + sql);
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
-            int x = 1;
-            double qty = 0;
+//            System.out.println("ini sql com kode nama " + sql);
+            kode_nama_arr.clear();
+            kode_nama_arr.add("");
             while (res.next()) {
-                System.out.println(x);
-                model.addRow(new Object[]{
-                    x++,
-                    res.getString("kode_barang"),
-                    res.getString("nama_barang_edit"),
-                    res.getString("nama_lokasi"),
-                    res.getString("nama_konversi"),
-                    res.getString("jumlah_barang"),
-                    res.getString("harga_penjualan"),
-                    res.getString("harga_jual"),
-                    res.getString("harga_revisi"),
-                    res.getString("total_harga")
-                });
-                txt_tbl_total.setText(res.getString("totale"));
-                qty += Double.parseDouble(res.getString("jumlah_barang"));
+                String gabung = res.getString("gabung");
+                kode_nama_arr.add(gabung);
+                item++;
             }
-            txt_item.setText("Jumlah Item : " + tbl_Penjualan.getRowCount());
-            txt_jumQty.setText("Jumlah Qty : " + qty);
+            if (item == 0) {
+                item = 1;
+            }
+//            System.out.println("kdenamarr: " + kode_nama_arr);
+            comCustomer.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
+            //((JTextComponent) comCustomer.getEditor().getEditorComponent()).setText(param);
+            conn.close();
             res.close();
-        } catch (SQLException | NumberFormatException e) {
+//            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "Eror -- 190" + e);
+        }
+
+    }
+
+    void loadCustomer() {
+
+        try {
+            String sql = "select * from customer";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                String name = res.getString(1) + " - " + res.getString(2);
+                comCustomer.addItem(name);
+            }
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
+
+    }
+
+    public void loadOrder() {
+        try {
+            String sql = "SELECT * FROM `order` ORDER BY order.no_faktur_order ASC";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                Object[] order = new Object[2];
+                order[0] = res.getString(2);
+                comOrder.addItem((String) order[0]);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    void loadTop() {
+
+        try {
+            String sql = "select * from top";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                String name = res.getString(2);
+                comTOP.addItem(name);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+
+    }
+
+    void loadStaff() {
+
+        try {
+            String sql = "select * from pegawai";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                String nama = res.getString(5);
+                comStaff.addItem(nama);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+
+    }
+
+    void loadSalesman() {
+
+        try {
+            String sql = "select s.nama_salesman, c.nama_customer, c.kode_customer from customer c, salesman s "
+                    + "where c.kode_salesman = s.kode_salesman"
+                    + "and c.kode_customer = '" + String.valueOf(comCustomer.getSelectedItem()) + "'";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                String nama = res.getString(2);
+                comSalesman.addItem(nama);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+
+    }
+
+//    void loadJenisKeuangan() {
+//
+//        try {
+//            String sql = "select * from transaksi_nama_keuangan";
+//            java.sql.Connection conn = (Connection) Koneksi.configDB();
+//            java.sql.Statement stm = conn.createStatement();
+//            java.sql.ResultSet res = stm.executeQuery(sql);
+//            while (res.next()) {
+//                String name = res.getString(2);
+//                com_jenisKeuangan.addItem(name);
+//            }
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(null, "Eror" + e);
+//        }
+//
+//    }
+    void loadComTableBarang() {
+//        TableModel tabelModel;
+//        tabelModel = tbl_Penjualan.getModel();
+//        int baris = tbl_Penjualan.getRowCount();
+        try {
+            String sql = "select * from barang order by nama_barang asc";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+//            for (int i = 0; i < baris; i++) {
+                String name = res.getString(1) + "- " + res.getString(4);
+                comTableBarang.addItem(name);
+            }
+        } catch (Exception e) {
+            //JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+
+    }
+
+    void loadcomTableKode() {
+        //        TableModel tabelModel;
+//        tabelModel = tbl_Penjualan.getModel();
+//        int baris = tbl_Penjualan.getRowCount();
+        try {
+            String sql = "select * from barang order by nama_barang asc";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+//            for (int i = 0; i < baris; i++) {
+                String name = res.getString(1) + "- " + res.getString(4);
+                comTableKode.addItem(name);
+            }
+        } catch (Exception e) {
+            //JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+    }
+
+    void loadComTableLokasi() {
+        try {
+            String sql = "select * from lokasi";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            System.out.println("lks: " + sql);
+            comTableLokasi.removeAllItems();
+            while (res.next()) {
+                String name = res.getString("nama_lokasi");
+                comTableLokasi.addItem(name);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
+
+    }
+
+    void loadComTableSatuan() {
+        try {
+            String sql = "select * from konversi k, barang_konversi bk, barang b "
+                    + "where b.kode_barang = bk.kode_barang "
+                    + "and bk.kode_konversi = k.kode_konversi "
+                    + "and b.kode_barang = '" + this.kode_barang + "' order by bk.kode_barang_konversi asc";
+            System.out.println("sts: " + sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            comTableKonv.removeAllItems();
+            while (res.next()) {
+                String name = res.getString("nama_konversi");
+                if (res.getString("identitas_konversi").toString().equalsIgnoreCase("1")) {
+                    System.out.println("ya: " + name);
+                    comTableKonv.setSelectedItem(name);
+                }
+                comTableKonv.addItem(name);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+            e.printStackTrace();
+        }
+    }
+
+    void loadNumberTable() {
+        int baris = tbl_Penjualan.getRowCount();
+        for (int a = 0; a < baris; a++) {
+            String nomor = String.valueOf(a + 1);
+            tbl_Penjualan.setValueAt(nomor + ".", a, 0);
+        }
+
+    }
+
+    void BersihField() {
+//        txt_inv.setText("");
+//        tgl_inv.setCalendar(null);
+//        txt_diskon.setText("");
+//        txt_diskonRp.setText("");
+    }
+
+    void AturlebarKolom() {
+        TableColumn column;
+        tbl_Penjualan.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        column = tbl_Penjualan.getColumnModel().getColumn(0);
+        column.setPreferredWidth(30);
+        column = tbl_Penjualan.getColumnModel().getColumn(1);
+        column.setPreferredWidth(50);
+        column = tbl_Penjualan.getColumnModel().getColumn(2);
+        column.setPreferredWidth(160);
+        column = tbl_Penjualan.getColumnModel().getColumn(3);
+        column.setPreferredWidth(120);
+        column = tbl_Penjualan.getColumnModel().getColumn(4);
+        column.setPreferredWidth(50);
+        column = tbl_Penjualan.getColumnModel().getColumn(5);
+        column.setPreferredWidth(50);
+        column = tbl_Penjualan.getColumnModel().getColumn(6);
+        column.setPreferredWidth(100);
+        column = tbl_Penjualan.getColumnModel().getColumn(7);
+        column.setPreferredWidth(100);
+        column = tbl_Penjualan.getColumnModel().getColumn(8);
+        column.setPreferredWidth(100);
+        column = tbl_Penjualan.getColumnModel().getColumn(9);
+        column.setPreferredWidth(100);
+    }
+
+    public void getTanggal() {
+        Thread p = new Thread() {
+            public void run() {
+                for (;;) {
+                    String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+                }
+            }
+        };
+        p.start();
+    }
+
+    public void tanggal_jam_sekarang() {
+        Thread p = new Thread() {
+            public void run() {
+                for (;;) {
+//                    GregorianCalendar cal = new GregorianCalendar();
+//                    int hari = cal.get(Calendar.DAY_OF_MONTH);
+//                    int bulan = cal.get(Calendar.MONTH);
+//                    int tahun = cal.get(Calendar.YEAR);
+//                    int jam = cal.get(Calendar.HOUR_OF_DAY);
+//                    int menit = cal.get(Calendar.MINUTE)//                    int detik = cal.get(Calendar.SECOND);
+//                    txt_tanggal.setText(tahun + "-" + (bulan + 1) + "-" + hari + " " + jam + ":" + menit + ":" + detik);
+                    String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+                    txt_tanggal.setText(timeStamp);
+                }
+            }
+        };
+        System.out.println(txt_tanggal.getText());
+        p.start();
+    }
+
+    public void autonumber() {
+        try {
+            String lastNo = "";
+            String sql = "select max(no_faktur_penjualan) from penjualan ORDER BY no_faktur_penjualan DESC";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                if (res.first() == false) {
+                    txt_faktur.setText("PJ");
+
+                } else {
+                    res.last();
+                    String auto_num = res.getString(1);
+
+                    String[] noLama = auto_num.split("-");
+//                    ++noLama;
+                    String no = String.valueOf(noLama[1]);
+//                    no = Integer.toString(noLama);
+
+                    if (no.length() == 1) {
+                        lastNo = "0000" + no;
+                    } else if (no.length() == 2) {
+                        lastNo = "000" + no;
+                    } else if (no.length() == 3) {
+                        lastNo = "00" + no;
+                    } else if (no.length() == 4) {
+                        lastNo = "0" + no;
+                    } else {
+                        lastNo = "00001";
+                    }
+
+                    int num = Integer.parseInt(lastNo);
+                    String huruf = String.valueOf(auto_num.substring(0, 5));
+                    num = Integer.valueOf(auto_num.substring(5)) + 0;
+                    String angkapad = rightPadZeros(String.valueOf(++num), 5);
+                    txt_faktur.setText(String.valueOf(huruf + "" + angkapad));
+                    this.no_faktur = txt_faktur.getText();
+
+                }
+            }
+            res.close();
+
+        } catch (Exception ex) {
+//            JOptionPane.showMessageDialog(this, "ERROR: \n" + ex.toString(),
+//                    "Kesalahan", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    public static String rightPadZeros(String str, int num) {
+        return String.format("%05d", Integer.parseInt(str));
     }
 
     private void loadForm(String no_faktur) {
@@ -704,7 +1107,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
             String sql = "SELECT * from penjualan p, customer c, salesman s, top t"
                     + "WHERE p.no_faktur_penjualan = '" + no_faktur + "' "
                     + "AND p.kode_customer = c.kode_customer "
-                    + "AND p.kode_salesman = s.kode_salesman "
+                    + "AND p.kode_salesman = s.nama_salesman "
                     + "AND p.id_top = t.id_top ";
             System.out.println("sql loadform" + sql);
             Connection conn = (Connection) Koneksi.configDB();
@@ -728,628 +1131,86 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         }
     }
 
-    void SaveData() {
-        try {
-            getId_penjualan();
-            getVerif();
-            int idCustomer = getIdCustomer(comCustomer.getSelectedItem().toString());
-//        String idStaff=getIdCustomer(comStaff.getSelectedItem().toString());
-//        String idSalesman=getIdCustomer(comSalesman.getSelectedItem().toString());
-            int idPenjualan = getId_penjualan();
-
-            Koneksi Koneksi = new Koneksi();
-            Connection con = Koneksi.configDB();
-            Statement st = con.createStatement();
-//            
-//                        String sql = "DELETE FROM penjualan "
-//                    + "WHERE no_faktur_penjualan = '" + txt_faktur.getText() + "'";
-//
-//            st.executeUpdate(sql);
-//
-//            sql = "DELETE FROM penjualan_detail "
-//                    + "WHERE no_faktur_penjualan = '" + txt_faktur.getText() + "'";
-
-//            st.executeUpdate(sql);
-            int totale = Integer.parseInt(txt_tbl_total.getText()) * -1;
-
-            SimpleDateFormat format_tanggal = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String date = format_tanggal.format(System.currentTimeMillis());
-
-            String sql = "insert into penjualan(no_faktur_penjualan, tgl_penjualan, keterangan_penjualan, status_verifikasi, no_faktur_order , id_top, staff, kode_customer, "
-                    + "kode_salesman, kode_pegawai, verifikasi_pegawai, tgl_validasi_penjualan, kode_pegawai_validasi, pembaran_udah_bayar, "
-                    + "pembayaran_aktif, potongan, denda_salesman, jumlah_print, print_gudang, print_jalan,"
-                    + "no_surat_jalan, tgl_surat_jalan, print_nota_jalan, tgl_nota_jalan, status_toko, tgl_bg_penjualan, "
-                    + "faktur_tempo_bg_penjualan, faktur_bg_penjualan, kode_pegawai_bg_penjualan, no_seri_bg, totale, kembali, tgl_filter_tutup_buku)"
-                    + "values('"
-                    + txt_faktur.getText() + "','"
-                    + date + "','"
-                    + txt_keterangan.getText() + "','"
-                    + 0 + "','" //nilai true false
-                    + 0 + "','"
-                    + 0 + "','" //id nya int comTOP.getSelectedItem()
-                    + comStaff.getSelectedItem() + "','"
-                    + idCustomer + "','" //id nya int idCustomer
-                    + 0 + "','" //id nya int idSalesman
-                    + 0 + "','" //id nya int idStaff
-                    + 0 + "','"
-                    + "0000-00-00" + "','"
-                    + 0 + "','"
-                    + totale + "','"
-                    + txt_tbl_total.getText() + "','"
-                    + 0 + "','"
-                    + 0 + "','"
-                    + 0 + "','"
-                    + 0 + "','"
-                    + 0 + "','"
-                    + "0" + "','"
-                    + date + "','"
-                    + 0 + "','"
-                    + date + "','"
-                    + 0 + "','"
-                    + date + "','"
-                    + date + "','"
-                    + "0" + "','"
-                    + 0 + "','"
-                    + "0" + "','"
-                    + txt_tbl_total.getText() + "','"
-                    + 0 + "','"
-                    + date + "');";
-            System.out.println("Mouse simpan pertama = " + sql);
-            int dbq = st.executeUpdate(sql);
-
-            int baris = tbl_Penjualan.getRowCount();
-            System.out.println("baris = " + baris);
-            TableModel tabelModel;
-            tabelModel = tbl_Penjualan.getModel();
-
-            for (int i = 0; i < baris; i++) {
-                //      getHargaJual(i);
-                sql = "insert into penjualan_detail( id_penjualan, no_faktur_penjualan, kode_barang, nama_barang_edit, "
-                        + "kode_lokasi, jumlah_barang, jumlah_per_pcs, max_return, jenis_harga, "
-                        + "harga_penjualan, harga_jual, harga_revisi, hpp, harga_jual1, harga_jual2, total_harga, "
-                        + "id_top, komisi, pembayaran_penjualan, kode_barang_konversi, status_toko)"
-                        + "value" + "('"
-                        + idPenjualan + "','"
-                        + txt_faktur.getText() + "','"
-                        + tbl_Penjualan.getValueAt(i, 1).toString() + "','"
-                        + tbl_Penjualan.getValueAt(i, 2).toString() + "','"
-                        + getKodeLokasi(i) + "','"
-                        + tbl_Penjualan.getValueAt(i, 5).toString() + "','"
-                        + getKonvPcs(i) + "','"
-                        + 0 + "','"
-                        + "0" + "','"
-                        + 0 + "','"
-                        + 0 + "','"
-                        + 0 + "','"
-                        + 0 + "','"
-                        + tmpHJ1 + "','"
-                        + tmpHJ2 + "','"
-                        + txt_tbl_total.getText() + "','"
-                        + 0 + "','"
-                        + 0 + "','"
-                        + 0 + "','"
-                        + 0 + "','"
-                        + 0 + "')";
-
-                int dbq2 = st.executeUpdate(sql);
-                //     System.out.println("Mouse simpan kedua = "+sql);
-
-                if (dbq2 == 1) {
-                    JOptionPane.showMessageDialog(null, "data barang ke " + (i + 1) + " sudah ditambahkan ke database", "informasi", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-            for (int i = 0; i < baris; i++) {
-                getQty(i);
-                System.out.println("Qty = " + jmlQty);
-                getQtyTambah(i);
-                System.out.println("Qty Tambah = " + jumlahTambah);
-                double kodelokasi = getKodeLokasi(i);
-                sql = "UPDATE barang_lokasi SET"
-                        + " jumlah = " + (jmlQty + jumlahTambah)
-                        + " WHERE"
-                        + " kode_barang = " + tbl_Penjualan.getValueAt(i, 1)
-                        + " AND kode_lokasi = " + kodelokasi;
-
-                int dbq3 = st.executeUpdate(sql);
-
-                if (dbq3 == 1) {
-                    JOptionPane.showMessageDialog(null, "data barang ke " + (i + 1) + " jumlah qty ditambah " + jumlahTambah, "informasi", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-
-            if (dbq == 1) {
-                JOptionPane.showMessageDialog(null, "data sudah ditambahkan ke database", "informasi", JOptionPane.INFORMATION_MESSAGE);
-                con.close();
-            }
-//            sql = "insert into customer( kode_customer, nama_customer, alamat_customer)"
-//                    + "value('" + idCustomer + "','" + txt_Nama.getText() + "','" + txt_Alamat.getText() + "');";
-////            System.out.println(sql);
-//            st.executeUpdate(sql);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "data tidak dimasukkan ke database " + e.getMessage(), "informasi ", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    void loadComTableSatuan() {
-        try {
-            /// identitas konversi tidak urut
-            String sql = "select * from konversi k, barang_konversi bk, barang b "
-                    + "where b.kode_barang = bk.kode_barang "
-                    + "and bk.kode_konversi = k.kode_konversi "
-                    + "and b.kode_barang = '" + kode_barang + "' order by bk.kode_barang_konversi asc";
-            System.out.println("sts: " + sql);
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            comTableKonv.removeAllItems();
-            int i = 1;
-            while (res.next()) {
-                String name = res.getString("nama_konversi");
-//                if (res.getString("identitas_konversi").toString().equalsIgnoreCase("1")) {
-//                    System.out.println("ya: " + name);
-//                    comTableKonv.setSelectedItem(name);
-//                }
-                System.out.println(name);
-                comTableKonv.addItem(name);
-                i++;
-
-            }
-            TableColumnModel m = tbl_Penjualan.getColumnModel();
-            m.getColumn(6).setCellRenderer(new Currency_Column());
-            m.getColumn(7).setCellRenderer(new Currency_Column());
-            m.getColumn(8).setCellRenderer(new Currency_Column());
-            m.getColumn(9).setCellRenderer(new Currency_Column());
-            //comTableKonv.setSelectedIndex(0);
-            res.close();
-            conn.close();
-//            comKodeKonv.addItem(name);
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-            e.printStackTrace();
-        }
-    }
-
-    String kodeSatuan(String nama_satuan, String kode_barang) {
-        String kode = null;
-        try {
-            Koneksi Koneksi = new Koneksi();
-            Connection con = Koneksi.configDB();
-            String sql1a = "select kode_konversi from barang_konversi where kode_konversi = (select kode_konversi from konversi where nama_konversi='" + nama_satuan + "') and kode_barang = '" + kode_barang + "'";
-            System.out.println(sql1a);
-            Statement st1a = con.createStatement();
-            java.sql.ResultSet res = st1a.executeQuery(sql1a);
-            while (res.next()) {
-                kode = res.getString("kode_konversi");
-            }
-            res.close();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-            e.printStackTrace();
-        }
-        return kode;
-    }
-
-    void seleksiLokasi(String nama_lokasi) {
-        try {
-            Koneksi Koneksi = new Koneksi();
-            Connection con = Koneksi.configDB();
-            String sql1a = "select kode_lokasi from lokasi where nama_lokasi = '" + nama_lokasi + "'";
-            System.out.println(sql1a);
-            Statement st1a = con.createStatement();
-            java.sql.ResultSet res = st1a.executeQuery(sql1a);
-            while (res.next()) {
-                kode_lokasi = Integer.parseInt(res.getString("kode_lokasi"));
-            }
-            res.close();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-            e.printStackTrace();
-        }
-    }
-
-    double qty_konversi(String kode_barang, String kode_konversi, double qty) {
-        double hasil = 0;
-        try {
-            String sql = "select * from barang_konversi where kode_barang='" + kode_barang + "' and kode_konversi ='" + kode_konversi + "'";
-            System.out.println("Kode konversi " + kode_konversi);
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            double jumlah_konversi = 0;
-            while (res.next()) {
-                jumlah_konversi = Double.parseDouble(res.getString("jumlah_konversi"));
-            }
-            hasil = jumlah_konversi * qty;
-            conn.close();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-        return hasil;
-    }
-
-    double konversi_stok(String kode_barang, String kode_konversi, double stok) {
-        double hasil = 0;
-        try {
-            String sql = "select * from barang_konversi where kode_barang='" + kode_barang + "' and kode_konversi ='" + kode_konversi + "'";
-            System.out.println("Kode konversi " + kode_konversi);
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            double jumlah_konversi = 0;
-            while (res.next()) {
-                jumlah_konversi = Double.parseDouble(res.getString("jumlah_konversi"));
-            }
-            hasil = stok / jumlah_konversi;
-            conn.close();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-        return hasil;
-    }
-
-    private void loadStock(String kodeBarang) {
-        try {
-            String lokasi = tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 3).toString();
-            seleksiLokasi(lokasi);
-            String sql = "SELECT jumlah from barang_lokasi "
-                    + "WHERE kode_barang = '" + kodeBarang + "'"
-                    + "AND kode_lokasi = '" + kode_lokasi + "'";
-            System.out.println("sts: " + sql);
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                stok = Double.parseDouble(res.getString("jumlah"));
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-            e.printStackTrace();
-        }
-    }
-
-    void HitungSubTotal() {
-
+    private void loadTable(String noFaktur) {
+        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
         TableModel tabelModel;
         tabelModel = tbl_Penjualan.getModel();
-        int baris = tbl_Penjualan.getRowCount();
-        int selectedRow = tbl_Penjualan.getSelectedRow();
-        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
         try {
-            String kode = tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1).toString();
-            String satuan = tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 4).toString();
-            double qty1 = Double.parseDouble(String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 5)));
-            String kode_satuan1 = kodeSatuan(satuan, kode);
-            double qty_cek = qty_konversi(kode, kode_satuan1, qty1);
-            double stok_konversi = konversi_stok(kode, kode_satuan1, stok);
-            System.out.println("qty_konversi : " + qty_cek);
+            hapustabel();
+            String sql = "SELECT * FROM penjualan_detail d, konversi k, lokasi l, penjualan p "
+                    + "WHERE d.kode_konversi = k.kode_konversi "
+                    + "AND d.kode_lokasi = l.kode_lokasi "
+                    + "AND d.no_faktur_penjualan = '" + noFaktur + "'"
+                    + "AND d.no_faktur_penjualan = p.no_faktur_penjualan";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                int tmpnomor = tbl_Penjualan.getRowCount() + 1;
+                int kode = res.getInt("kode_barang");
+                String nama = res.getString("nama_barang_edit");
+                String lokasi = res.getString("nama_lokasi");
+                String konv = res.getString("nama_konversi");
+                int jml = res.getInt("jumlah_barang");
+                int jharga = res.getInt("harga_penjualan");
+                int harga = res.getInt("harga_jual");
+                int rekharga = res.getInt("harga_revisi");
+                int subtotal = res.getInt("total_harga");
+                model.insertRow(tbl_Penjualan.getRowCount(), new Object[]{tmpnomor, kode, nama, lokasi, konv, jml, jharga, harga, rekharga, subtotal});
 
-            loadStock(kode);
-            if (qty_cek > stok) {
-                JOptionPane.showMessageDialog(null, "Qty tidak boleh lebih dari stok. Stock tersedia = " + stok_konversi + " " + satuan);
-                tbl_Penjualan.setValueAt(stok_konversi, selectedRow, 5);
-
-            } else if ((tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 5) != "")
-                    && (tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 7) != "")) {
-
-                int harga1, jenis_harga;
-                int row = tbl_Penjualan.getSelectedRow();
-                jenis_harga = Integer.parseInt(tbl_Penjualan.getValueAt(row, 6).toString());
-                harga1 = (int) (qty_cek * jenis_harga);
-                tbl_Penjualan.setValueAt(harga1, row, 7);
-                //jumlah = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
-                //harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 7).toString());
-                //subtotal = (int) (jumlah * harga);
-                tabelModel.setValueAt(harga1, tbl_Penjualan.getSelectedRow(), 9);
-                HitungSemua();
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Data tidak boleh kosong" + e);
+            JOptionPane.showMessageDialog(null, "Eror" + e);
             e.printStackTrace();
         }
+//        setTotal();
+//        uangtotal();
 
     }
 
-    void loadCustomer(String param) {
-        if (param.equals("*")) {
-            param = "";
+    void totalhargajadi() {
+        int jumlahBaris = tbl_Penjualan.getRowCount();
+        int totalBiaya = 0;
+        int jumlahBarang, hargaBarang;
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        for (int i = 0; i < jumlahBaris; i++) {
+            jumlahBarang = Integer.parseInt(tabelModel.getValueAt(i, 0).toString());
+            hargaBarang = Integer.parseInt(tabelModel.getValueAt(i, 1).toString());
+            totalBiaya = totalBiaya + (jumlahBarang * hargaBarang);
         }
-        if (param.substring(0,1).equals(" ")) {
-            param = param.substring(1);
-        }
-        try {
-//            String sql = "select * from supplier where nama_supplier like '%"+param+"%' or kode_supplier like '%"+param+"%'";
-            String sql = "select concat(kode_customer,\" - \",nama_customer) as gabung from customer "
-                    + "where kode_customer ='" + param + "' OR nama_customer like '%" + param + "%'";
-//            System.out.println("sql: " + sql);
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-//            System.out.println("ini sql com kode nama " + sql);
-            kode_nama_arr.clear();
-            kode_nama_arr.add("");
-            while (res.next()) {
-                String gabung = res.getString("gabung");
-                kode_nama_arr.add(gabung);
-                item++;
-            }
-            if (item == 0) {
-                item = 1;
-            }
-//            System.out.println("kdenamarr: " + kode_nama_arr);
-            comCustomer.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
-            //((JTextComponent) comSupplier.getEditor().getEditorComponent()).setText(param);
-            conn.close();
-            res.close();
-//            }
-        } catch (Exception e) {
-//            e.printStackTrace();
-//            JOptionPane.showMessageDialog(null, "Eror -- 190" + e);
-        }
-
-    }
-    
-    void loadCustomer() {
-
-        try {
-            String sql = "select * from customer";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                //String kode = res.getString(1);
-                //String name = res.getString(2);
-                String name = res.getString(1) + " - " + res.getString(2);
-                comCustomer.addItem(name);                
-                //comCustomer.addItem(kode+" - "+name);
-                
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-
+        txt_tbl_total.setText(String.valueOf(totalBiaya));
     }
 
-    void loadStaff() {
-
-        try {
-            String sql = "select * from pegawai";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                String nama = res.getString(5);
-//                String kode = res.getString(1);
-                comStaff.addItem(nama);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
+    void setTmpTotal() {
+        int jumlahBaris = tbl_Penjualan.getRowCount();
+        totalBiaya = 0;
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        for (int i = 0; i < jumlahBaris; i++) {
+            double hargaJadi = Double.parseDouble(tabelModel.getValueAt(i, 9).toString());
+            totalBiaya = totalBiaya + hargaJadi;
         }
-
     }
 
-    void loadSalesman() {
-
-        try {
-            String sql = "select * from salesman";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                String nama = res.getString(2);
-//                String kode = res.getString(1);
-                comSalesman.addItem(nama);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-
-    }
-
-    void loadTOP() {
-
-        try {
-            String sql = "select * from top";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                String nama = res.getString(2);
-//                String kode = res.getString(1);
-                comTOP.addItem(nama);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-
-    }
-
-    private void removeSelectedRows(JTable table) {
-        int Hapus = 1;
-        Hapus = JOptionPane.showConfirmDialog(null, "Apakah anda yakin mau menghapus baris ?", "konfirmasi", JOptionPane.YES_NO_OPTION);
+    void hapussemuatabel() {
+        int Hapus = JOptionPane.showConfirmDialog(null, "Apakah anda yakin mau menghapus semua data di tabel", "konfirmasi", JOptionPane.YES_NO_OPTION);
         if (Hapus == 0) {
-            DefaultTableModel model = (DefaultTableModel) this.tbl_Penjualan.getModel();
-            int[] rows = table.getSelectedRows();
-            for (int i = 0; i < rows.length; i++) {
-                model.removeRow(rows[i] - i);
+            DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+            for (int i = tbl_Penjualan.getRowCount() - 1; i > -1; i--) {
+                model.removeRow(i);
+
             }
+            model.addRow(new Object[]{"", "", "", "", "", "", "", "", ""});
         }
     }
 
-    void loadComTableKode() {
-        try {
-            String sql = "select * from barang order by kode_barang asc";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                String name = res.getString(4);
-                comTableKode.addItem(name);
+    void hapustabel() {
+        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+        for (int i = tbl_Penjualan.getRowCount() - 1; i > -1; i--) {
+            model.removeRow(i);
 
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
         }
-
-    }
-
-    public void loadComOrder() {
-        try {
-            String sql = "SELECT * FROM `order` ORDER BY order.no_faktur_order ASC";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                Object[] order = new Object[2];
-                order[0] = res.getString(2);
-                comOrder.addItem((String) order[0]);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    void loadComTableLokasi() {
-        try {
-            String sql = "select * from lokasi";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                String name = res.getString(2);
-                comTableLokasi.addItem(name);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-
-    }
-
-    void ClearData() {
-        DefaultTableModel dm = (DefaultTableModel) tbl_Penjualan.getModel();
-        dm.getDataVector().removeAllElements();
-        dm.fireTableDataChanged();
-        dm.addRow(new Object[]{"", "", "", "", "", "0", "0", "0", "0", "0"});
-    }
-
-    void loadNumberTable() {
-        int baris = tbl_Penjualan.getRowCount();
-        for (int a = 0; a < baris; a++) {
-            String nomor = String.valueOf(a + 1);
-            tbl_Penjualan.setValueAt(nomor + ".", a, 0);
-        }
-
-    }
-
-    void AturlebarKolom() {
-        TableColumn column;
-        tbl_Penjualan.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        column = tbl_Penjualan.getColumnModel().getColumn(0);
-        column.setPreferredWidth(30);
-        column = tbl_Penjualan.getColumnModel().getColumn(1);
-        column.setPreferredWidth(100);
-        column = tbl_Penjualan.getColumnModel().getColumn(2);
-        column.setPreferredWidth(150);
-        column = tbl_Penjualan.getColumnModel().getColumn(3);
-        column.setPreferredWidth(70);
-        column = tbl_Penjualan.getColumnModel().getColumn(4);
-        column.setPreferredWidth(70);
-        column = tbl_Penjualan.getColumnModel().getColumn(5);
-        column.setPreferredWidth(70);
-        column = tbl_Penjualan.getColumnModel().getColumn(6);
-        column.setPreferredWidth(90);
-        column = tbl_Penjualan.getColumnModel().getColumn(7);
-        column.setPreferredWidth(90);
-        column = tbl_Penjualan.getColumnModel().getColumn(8);
-        column.setPreferredWidth(95);
-        column = tbl_Penjualan.getColumnModel().getColumn(9);
-        column.setPreferredWidth(100);
-
-        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-        tbl_Penjualan.getColumnModel().getColumn(6).setCellRenderer(rightRenderer);
-        tbl_Penjualan.getColumnModel().getColumn(7).setCellRenderer(rightRenderer);
-        tbl_Penjualan.getColumnModel().getColumn(8).setCellRenderer(rightRenderer);
-        tbl_Penjualan.getColumnModel().getColumn(9).setCellRenderer(rightRenderer);
-        txt_tbl_total.setHorizontalAlignment(JTextField.RIGHT);
-
-    }
-
-    void BersihField() {
-        txt_faktur.setText("");
-        txt_keterangan.setText("");
-    }
-
-    public void autonumber() {
-        try {
-            String lastNo = "";
-            String sql = "select max(no_faktur_penjualan) from penjualan ORDER BY no_faktur_penjualan DESC";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                if (res.first() == false) {
-                    txt_faktur.setText("PJ");
-
-                } else {
-                    res.last();
-                    String auto_num = res.getString(1);
-
-                    int noLama = Integer.parseInt(auto_num.substring(auto_num.length() - 4));
-                    ++noLama;
-                    String no = String.valueOf(noLama);
-                    no = Integer.toString(noLama);
-
-                    if (no.length() == 1) {
-                        lastNo = "0000" + no;
-                    } else if (no.length() == 2) {
-                        lastNo = "000" + no;
-                    } else if (no.length() == 3) {
-                        lastNo = "00" + no;
-                    } else if (no.length() == 4) {
-                        lastNo = "0" + no;
-                    } else {
-                        lastNo = "00001";
-                    }
-
-                    int num = Integer.parseInt(lastNo);
-                    String huruf = String.valueOf(auto_num.substring(0, 5));
-                    num = Integer.valueOf(auto_num.substring(5)) + 0;
-                    String angkapad = rightPadZeros(String.valueOf(++num), 5);
-                    txt_faktur.setText(String.valueOf(huruf + "" + angkapad));
-                    System.out.println(num);
-
-                }
-            }
-            res.close();
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "ERROR: \n" + ex.toString(),
-                    "Kesalahan", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    public static String rightPadZeros(String str, int num) {
-        return String.format("%05d", Integer.parseInt(str));
-    }
-
-    public void tanggal_jam_sekarang() {
-        Thread p = new Thread() {
-            public void run() {
-                for (;;) {
-                    GregorianCalendar cal = new GregorianCalendar();
-                    int hari = cal.get(Calendar.DAY_OF_MONTH);
-                    int bulan = cal.get(Calendar.MONTH);
-                    int tahun = cal.get(Calendar.YEAR);
-                    int jam = cal.get(Calendar.HOUR_OF_DAY);
-                    int menit = cal.get(Calendar.MINUTE);
-                    int detik = cal.get(Calendar.SECOND);
-                    txt_tanggal.setText(tahun + "-" + (bulan + 1) + "-" + hari + " " + jam + ":" + menit + ":" + detik);
-
-                }
-            }
-        };
-        p.start();
     }
 
     static String rptabel(String b) {
@@ -1364,48 +1225,115 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         return b;
     }
 
-    private String currency_convert(int nilai) {
-        DecimalFormat kursIndonesia = (DecimalFormat) DecimalFormat.getCurrencyInstance();
-        DecimalFormatSymbols formatRp = new DecimalFormatSymbols();
-        formatRp.setCurrencySymbol("Rp. ");
-        formatRp.setMonetaryDecimalSeparator(',');
-        formatRp.setGroupingSeparator('.');
-        kursIndonesia.setDecimalFormatSymbols(formatRp);
-        return kursIndonesia.format(nilai);
+    void dpnya() {
+//        float t = Float.parseFloat(totalclone);
+//        float dp = Float.parseFloat(txt_dp.getText());
+//        String h = String.valueOf(t - dp);
+//        System.out.println(t + " : " + dp + " : " + h);
+//        txt_tbl_total.setText(h);
     }
 
-    public void HitungSemua() {
+    private void HitungSemua() {
+        double subtotalfix = 0, grandtotal = 0, jumlahItem = 0, jumlahQty = 0;
+//        if (!txt_dp.getText().equals("")) {
+//            discount = Integer.parseInt(txt_dp.getText().toString());
+//        }
         if (tbl_Penjualan.getRowCount() >= 1) {
-            subtotalfix = 0;
+            for (int i = tbl_Penjualan.getRowCount() - 1; i > -1; i--) {
+                double x = Integer.parseInt(tbl_Penjualan.getValueAt(i, 9).toString().replace(".0", ""));
+                int y = Integer.parseInt(tbl_Penjualan.getValueAt(i, 5).toString().replace(".0", ""));
+                double b = tbl_Penjualan.getRowCount();
+//                System.out.println(x);
+                subtotalfix += x;
+                jumlahQty += y;
+                txt_item.setText("" + b);
+
+            }
+        }
+//        txt_jumQty.setText(String.valueOf(jumlahQty));
+        txt_tbl_total.setText(String.valueOf(subtotalfix));
+
+//
+//        jumlahItem = tbl_Penjualan.getRowCount() - 1;
+//        txt_item.setText(String.valueOf(jumlahItem));
+        int i = tbl_Penjualan.getRowCount();
+        jumlahQty = 0;
+        for (int j = 0; j < i; j++) {
+            jumlahQty += Integer.parseInt(tbl_Penjualan.getValueAt(j, 5).toString());
+        }
+        txt_jumQty.setText(String.valueOf(jumlahQty));
+        grandtotal = subtotalfix;
+        txt_tbl_total.setText(String.valueOf(grandtotal));
+
+//        uangdp();
+        uangtotal();
+
+    }
+
+    private void Hitung() {
+        int subtotalfix = 0, grandtotal = 0, jumlahItem = 0, jumlahQty = 0;
+//        if (!txt_dp.getText().equals("")) {
+//            discount = Integer.parseInt(txt_dp.getText().toString());
+//        }
+        if (tbl_Penjualan.getRowCount() >= 1) {
             for (int i = tbl_Penjualan.getRowCount() - 1; i > -1; i--) {
                 int x = Integer.parseInt(tbl_Penjualan.getValueAt(i, 9).toString());
                 subtotalfix += x;
             }
-            txt_tbl_total.setText(String.valueOf(currency_convert(subtotalfix)));
+        }
+        txt_tbl_total.setText(String.valueOf(subtotalfix));
+//
+//        jumlahItem = tbl_Penjualan.getRowCount() - 1;
+//        txt_item.setText(String.valueOf(jumlahItem));
+
+        int i = tbl_Penjualan.getRowCount();
+
+        for (int j = 0; j < i; j++) {
+            jumlahQty += Integer.parseInt(tbl_Penjualan.getValueAt(j, 5).toString());
+        }
+        txt_jumQty.setText(String.valueOf(jumlahQty));
+        grandtotal = subtotalfix;
+        txt_tbl_total.setText(String.valueOf(grandtotal));
+
+    }
+
+    private void removeSelectedRows(JTable table) {
+        int Hapus = 1;
+        Hapus = JOptionPane.showConfirmDialog(null, "Apakah anda yakin mau menghapus baris ?", "konfirmasi", JOptionPane.YES_NO_OPTION);
+        if (Hapus == 0) {
+            DefaultTableModel model = (DefaultTableModel) this.tbl_Penjualan.getModel();
+            int[] rows = table.getSelectedRows();
+
+            for (int i = 0; i < rows.length; i++) {
+                model.removeRow(rows[i] - i);
+            }
         }
     }
 
-    void showQTY() {
-        try {
-            jumlah_item = tbl_Penjualan.getRowCount();
-            double qty, jumqty = 0;
-            System.out.println("row count : " + jumlah_item);
-            for (int j = 0; j < tbl_Penjualan.getRowCount();) {
-                if (tbl_Penjualan.getValueAt(j, 5) != "") {
-                    qty = Double.parseDouble(tbl_Penjualan.getValueAt(j, 5).toString());
-                    jumqty += qty;
-                }
-                j++;
-            }
-            jumlah_qty = jumqty;
-            txt_item.setText("Jumlah Item : " + jumlah_item);
-            txt_jumQty.setText("Jumlah Qty : " + String.valueOf(jumlah_qty));
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Data tidak boleh kosong" + e);
-            e.printStackTrace();
+    public void uangtotal() {
+        String b;
+        b = txt_tbl_total.getText();
+        if (b.isEmpty()) {
+            b = "0";
+        } else {
+            b = b.replace(",", "");
+            b = NumberFormat.getNumberInstance(Locale.getDefault()).format(Double.parseDouble(b));
+            b = b.replace(",", ".");
         }
+        txt_tbl_total.setText(b);
+    }
 
+    public void uangdp() {
+//        String b;
+//        b = txt_dp.getText();
+//        if (b.isEmpty()) {
+//            b = "0";
+//        } else {
+//            b = b.replace(",", "");
+//            b = NumberFormat.getNumberInstance(Locale.getDefault()).format(Double.parseDouble(b));
+//            b = b.replace(",", ".");
+//        }
+//        txt_dp.setText(b);
     }
 
     @SuppressWarnings("unchecked")
@@ -1471,6 +1399,11 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
         comTableKode.setEditable(true);
         comTableKode.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-" }));
+        comTableKode.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comTableKodeItemStateChanged(evt);
+            }
+        });
         comTableKode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comTableKodeActionPerformed(evt);
@@ -1479,6 +1412,11 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
         comTableBarang.setEditable(true);
         comTableBarang.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-" }));
+        comTableBarang.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comTableBarangItemStateChanged(evt);
+            }
+        });
         comTableBarang.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comTableBarangActionPerformed(evt);
@@ -1565,11 +1503,6 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
         txt_Nama.setEditable(false);
         txt_Nama.setBackground(new java.awt.Color(153, 255, 153));
-        txt_Nama.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_NamaActionPerformed(evt);
-            }
-        });
 
         jLabel10.setForeground(new java.awt.Color(255, 0, 0));
         jLabel10.setText("Alamat");
@@ -1593,6 +1526,13 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         jLabel14.setForeground(new java.awt.Color(51, 51, 255));
         jLabel14.setText("Salesman");
 
+        comSalesman.setEditable(true);
+        comSalesman.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comSalesmanActionPerformed(evt);
+            }
+        });
+
         jLabel15.setText("T.O.P");
 
         jLabel16.setText("Staff");
@@ -1611,6 +1551,11 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                 txt_keteranganActionPerformed(evt);
             }
         });
+        txt_keterangan.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txt_keteranganKeyPressed(evt);
+            }
+        });
 
         tbl_Penjualan.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1621,11 +1566,16 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, true, true, false, false, true, false, false, true, false
+                false, true, true, true, false, true, false, true, true, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        tbl_Penjualan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbl_PenjualanMouseClicked(evt);
             }
         });
         tbl_Penjualan.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1689,7 +1639,8 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
         comCustomer.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
         comCustomer.setEditable(true);
-        comCustomer.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "" }));
+        comCustomer.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "=== Pilih Customer ===" }));
+        comCustomer.setRequestFocusEnabled(true);
         comCustomer.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 comCustomerItemStateChanged(evt);
@@ -1698,6 +1649,12 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         comCustomer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comCustomerActionPerformed(evt);
+            }
+        });
+
+        comOrder.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comOrderActionPerformed(evt);
             }
         });
 
@@ -1943,9 +1900,6 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        comCustomer.getAccessibleContext().setAccessibleName("");
-        comCustomer.getAccessibleContext().setAccessibleDescription("");
-
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -2000,106 +1954,166 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_comTableKodeActionPerformed
 
     private void comTableLokasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comTableLokasiActionPerformed
-        // TODO add your handling code here:
+        try {
+            String barang = comTableBarang.getSelectedIndex() != -1 ? comTableBarang.getSelectedItem().toString() : comTableKode.getSelectedItem().toString();
+            String sql = "select * from lokasi l, barang_lokasi bl, barang b "
+                    + "where l.kode_lokasi = bl.kode_lokasi "
+                    + "and b.kode_barang = bl.kode_barang "
+                    + "and l.nama_lokasi = '" + comTableLokasi.getSelectedItem().toString() + " "
+                    + "and b.nama_barang = '" + barang + "'";
+//            System.out.println("stl: "+sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                String id = res.getString(2);
+                int selectedRow = tbl_Penjualan.getSelectedRow();
+                if (selectedRow != -1) {
+                    int stok_now = res.getInt("jumlah");
+                    stok = stok_now;
+                    System.out.println("st_n: " + stok);
+                    tbl_Penjualan.setValueAt(id, selectedRow, 3);
+                }
+            }
+        } catch (Exception e) {
+            //JOptionPane.showMessageDialog(null, "Eror" + e);
+        }
     }//GEN-LAST:event_comTableLokasiActionPerformed
 
     private void comTableKonvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comTableKonvActionPerformed
-        /*
-         DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
-         int baris = tbl_Penjualan.getRowCount();
-         TableModel tabelModel;
-         tabelModel = tbl_Penjualan.getModel();
-         int kode_barang = 0;
-         try {
-         for (int i = 0; i < baris; i++) {
-         kode_barang = Integer.parseInt(tabelModel.getValueAt(i, 1).toString());
-         }
-         String sql = "select nama_konversi, jumlah_konversi, identitas_konversi from barang_konversi bk, konversi k where bk.kode_konversi = k.kode_konversi and bk.kode_barang ='" + kode_barang + "'";
-         System.out.println("sql: " + sql);
-         java.sql.Connection conn = (Connection) Koneksi.configDB();
-         java.sql.Statement stm = conn.createStatement();
-         java.sql.ResultSet res = stm.executeQuery(sql);
-         while (res.next()) {
-         System.out.println("y1 " + comTableKonv.getSelectedIndex() + " a: " + res.getInt(3));
-         if (comTableKonv.getSelectedIndex() == res.getInt(3) - 1) {
-         System.out.println("y2 " + res.getInt(2) + " t: " + Tempharga);
-         int temp = Tempharga * res.getInt(2);
-         System.out.println("error: " + temp);
-         model.setValueAt(String.valueOf(temp), tbl_Penjualan.getSelectedRow(), 7);
+        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+        int baris = tbl_Penjualan.getRowCount();
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        int kode_barang = 0;
+        try {
+//            for (int i = 0; i < baris; i++) {
+//                kode_barang = Integer.parseInt(tabelModel.getValueAt(i, 1).toString());
+//            }
+            kode_barang = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 1).toString());
+            String sql = "select nama_konversi, jumlah_konversi, identitas_konversi from barang_konversi bk, konversi k where bk.kode_konversi = k.kode_konversi and bk.kode_barang ='" + kode_barang + "'";
+            System.out.println("sql: " + sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+                System.out.println("y1 " + comTableKonv.getSelectedIndex() + " a: " + res.getInt(3));
+                if (comTableKonv.getSelectedIndex() == res.getInt(3) - 1) {
+                    System.out.println("y2 " + res.getInt(2) + " t: " + Tempharga);
+                    double temp = Tempharga * res.getInt(2);
+                    System.out.println("error: " + temp);
+                    for (int i = 0; i < baris; i++) {
+                        int tmpJumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+                        model.setValueAt(String.valueOf(temp * tmpJumlah), tbl_Penjualan.getSelectedRow(), 7);
+                        model.setValueAt(String.valueOf(temp * tmpJumlah), tbl_Penjualan.getSelectedRow(), 9);
+                    }
+                }
+            }
 
-         }
-         }
-         } catch (Exception e) {
-         JOptionPane.showMessageDialog(null, "Pilih Barang dan Harga Terlebih Dahulu !");
-         }
-         */
+        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(null, "Pilih Barang dan Harga Terlebih Dahulu !");
+        }
+
+//        System.out.println("eaaaa");
+//        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+//        int baris = tbl_Penjualan.getRowCount();
+//        TableModel tabelModel;
+//        tabelModel = tbl_Penjualan.getModel();
+//        int kode_barang = 0;
+//        try {
+//            for (int i = 0; i < baris; i++) {
+//                kode_barang = Integer.parseInt(tabelModel.getValueAt(i, 1).toString());
+//            }
+//            String sql = "select * from barang_konversi where kode_barang ='" + kode_barang + "'";
+//            java.sql.Connection conn = (Connection) Koneksi.configDB();
+//            java.sql.Statement stm = conn.createStatement();
+//            java.sql.ResultSet res = stm.executeQuery(sql);
+//           
+//            while (res.next()) {
+//                String konvTemp = res.getString(2);
+//                int selectedRow = tbl_Penjualan.getSelectedRow();
+//                if ((comTableKonv.getSelectedIndex() == 1) & (comTableKonv.getSelectedIndex() + 1) == res.getInt(5)) {
+//                    int temporary = (int) Float.parseFloat(Tempharga);
+//                    float temp = temporary * res.getInt(4);
+//                    model.setValueAt(String.valueOf(temp), 0, 6);
+//                 
+//                } else{
+//                     int temporary = (int) Float.parseFloat(Tempharga);
+//                    model.setValueAt(String.valueOf(temporary), 0, 6);
+//             
+//                }
+//            }
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(null, "Eror" + e);
+//        }
 
     }//GEN-LAST:event_comTableKonvActionPerformed
 
     private void tbl_PenjualanKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbl_PenjualanKeyPressed
-        // int kode_barang = 0;
+        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+        int selectedRow = tbl_Penjualan.getSelectedRow();
+        int baris = tbl_Penjualan.getRowCount();
+        int jumlah = 0, harga = 0, harga_jadi = 0;
+        int qty = 0;
+
         TableModel tabelModel;
         tabelModel = tbl_Penjualan.getModel();
-        int baris = tbl_Penjualan.getRowCount();
-        int selectedRow = tbl_Penjualan.getSelectedRow();
-        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
-        // InputMap im = tbl_Penjualan.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        //KeyStroke down = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
-        //KeyStroke f2 = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
-        //  im.put(down, im.get(f2));
 
-        if (comTableKode.requestFocus(true)) {
-            tbl_Penjualan.setCellSelectionEnabled(true);
-            tbl_Penjualan.changeSelection(selectedRow, 1, false, false);
-        } else if (comTableBarang.requestFocus(true)) {
-            tbl_Penjualan.setCellSelectionEnabled(true);
-            tbl_Penjualan.changeSelection(selectedRow, 2, false, false);
-
-            //    tbl_Penjualan.requestFocus();
-        } else if (evt.getKeyCode() == KeyEvent.VK_DOWN && (tbl_Penjualan.getSelectedColumn() == 1 || tbl_Penjualan.getSelectedColumn() == 2)) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {    // Membuat Perintah Saat Menekan Enter
+            jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
+            jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
+            tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
+            int subtotal = (int) (harga * jumlah * tmppcs);
+            tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+            HitungSemua();
+            if (tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString().equals("0")) {
+                JOptionPane.showMessageDialog(null, "Data Terakhir Tidak Boleh kosong", "", 2);
+            } else {
+                if (Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getRowCount() - 1, 9).toString()) != 0) {
+                    model.addRow(new Object[]{"", "", "", "", "", "0", "0", "0", "0"});
+                }
+            }
+        } else if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
+            if (tbl_Penjualan.getRowCount() - 1 == -1) {
+                JOptionPane.showMessageDialog(null, "Data didalam tabel telah tiada.", "", 2);
+            } else {
+                removeSelectedRows(tbl_Penjualan);
+                HitungSemua();
+            }
+        } else if (evt.getKeyCode() == KeyEvent.VK_INSERT) {
+            if (tbl_Penjualan.getRowCount() - 1 == -1) {
+                model.addRow(new Object[]{"", "", "", "", "0", "", "0", "0", "0"});
+            }
+        } else if (evt.getKeyCode() == KeyEvent.VK_F12) {
+            int simpan_data = 1;
+            simpan_data = JOptionPane.showConfirmDialog(null, "Apakah anda yakin ingin menyimpan data ini ?", "konfirmasi", JOptionPane.YES_NO_OPTION);
+            if (simpan_data == 0) {
+                simpan_data();
+            }
+        } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            this.dispose();
+        } else if (evt.getKeyCode() == KeyEvent.VK_F9) {
+            clear();
+        } else if (evt.getKeyCode() == KeyEvent.VK_DOWN && (tbl_Penjualan.getSelectedColumn() == 2 || tbl_Penjualan.getSelectedColumn() == 3)) {
             InputMap im = tbl_Penjualan.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             KeyStroke down = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
             KeyStroke f2 = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
             im.put(down, im.get(f2));
             System.out.println("asd");
-
-        } else if (evt.getKeyCode() == KeyEvent.VK_DOWN && (tbl_Penjualan.getSelectedColumn() == 0
-                || tbl_Penjualan.getSelectedColumn() == 3 || tbl_Penjualan.getSelectedColumn() == 4
-                || tbl_Penjualan.getSelectedColumn() == 5 || tbl_Penjualan.getSelectedColumn() == 6
-                || tbl_Penjualan.getSelectedColumn() == 7 || tbl_Penjualan.getSelectedColumn() == 8
-                || tbl_Penjualan.getSelectedColumn() == 9)) {
+        } else if (evt.getKeyCode() == KeyEvent.VK_DOWN && (tbl_Penjualan.getSelectedColumn() != 2)) {
             InputMap im = tbl_Penjualan.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             KeyStroke down = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
             KeyStroke f2 = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
             im.put(f2, null);
             im.put(down, null);
             System.out.println("fgh");
-        } else if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            if (tbl_Penjualan.getRowCount() - 1 == -1) {
-                JOptionPane.showMessageDialog(null, "Data didalam tabel telah tiada.", "", 2);
-                showQTY();
-                HitungSemua();
-            } else {
-                removeSelectedRows(tbl_Penjualan);
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_F12) {
-            int simpan_data = 1;
-            simpan_data = JOptionPane.showConfirmDialog(null, "Apakah anda yakin ingin menyimpan data ?", "konfirmasi", JOptionPane.YES_NO_OPTION);
-            if (simpan_data == 0) {
-                SaveData();
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_F9) {
-            System.out.println("clear data");
-            ClearData();
-        } else if (evt.getKeyCode() == KeyEvent.VK_ENTER && tbl_Penjualan.getSelectedColumn() == 9) {
-            model.addRow(new Object[]{"", "", "", "", "", "", "", "", "", ""});
-        } //                
-        //SATUAN
-        else if (evt.getKeyCode() == KeyEvent.VK_1 && tbl_Penjualan.getSelectedColumn() == 4) {
+        } else if ((evt.getKeyCode() == KeyEvent.VK_1 || evt.getKeyCode() == KeyEvent.VK_NUMPAD2) && tbl_Penjualan.getSelectedColumn() == 4) {
             System.out.println("ini alt");
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
-                String sql = "select nama_konversi, bk.jumlah_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '1' and bk.kode_barang = '" + kode_barang + "'";
+                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '1' and bk.kode_barang = '" + kode_barang + "'";
                 java.sql.Connection conn = (Connection) Koneksi.configDB();
                 java.sql.Statement stm = conn.createStatement();
                 java.sql.ResultSet res = stm.executeQuery(sql);
@@ -2107,20 +2121,18 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                     String sat = res.getString("nama_konversi");
                     String sat2 = sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 4);
-                    //harga
-                    int jml = res.getInt("jumlah_konversi");
-                    tbl_Penjualan.setValueAt(this.harga, tbl_Penjualan.getSelectedRow(), 7);
+                    System.out.println(sat2);
                 }
                 res.close();
                 conn.close();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
-        } else if (evt.getKeyCode() == KeyEvent.VK_2 && tbl_Penjualan.getSelectedColumn() == 4) {
+        } else if ((evt.getKeyCode() == KeyEvent.VK_2 || evt.getKeyCode() == KeyEvent.VK_NUMPAD2) && tbl_Penjualan.getSelectedColumn() == 4) {
             System.out.println("ini alt");
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
-                String sql = "select nama_konversi, bk.jumlah_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '2' and bk.kode_barang = '" + kode_barang + "'";
+                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '2' and bk.kode_barang = '" + kode_barang + "'";
                 java.sql.Connection conn = (Connection) Koneksi.configDB();
                 java.sql.Statement stm = conn.createStatement();
                 java.sql.ResultSet res = stm.executeQuery(sql);
@@ -2128,210 +2140,82 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
                     String sat = res.getString("nama_konversi");
                     String sat2 = sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 4);
-                    //harga
-                    int jml = res.getInt("jumlah_konversi");
-                    tbl_Penjualan.setValueAt(this.harga, tbl_Penjualan.getSelectedRow(), 7);
+                    System.out.println(sat2);
                 }
                 res.close();
                 conn.close();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
-        } else if (evt.getKeyCode() == KeyEvent.VK_3 && tbl_Penjualan.getSelectedColumn() == 4) {
+        } else if ((evt.getKeyCode() == KeyEvent.VK_2 || evt.getKeyCode() == KeyEvent.VK_NUMPAD2) && tbl_Penjualan.getSelectedColumn() == 6) {
             System.out.println("ini alt");
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
-                String sql = "select nama_konversi, bk.jumlah_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '3' and bk.kode_barang = '" + kode_barang + "'";
+                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi ="
+                        + " k.kode_konversi where bk.identitas_konversi = '2' and bk.kode_barang = '" + kode_barang + "'";
                 java.sql.Connection conn = (Connection) Koneksi.configDB();
                 java.sql.Statement stm = conn.createStatement();
                 java.sql.ResultSet res = stm.executeQuery(sql);
                 while (res.next()) {
                     String sat = res.getString("nama_konversi");
                     String sat2 = sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
+                    System.out.println(sat2);
+                }
+                res.close();
+                conn.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Eror" + e);
+            }
+        } else if ((evt.getKeyCode() == KeyEvent.VK_1 || evt.getKeyCode() == KeyEvent.VK_NUMPAD1) && tbl_Penjualan.getSelectedColumn() == 6) {
+            System.out.println("ini alt");
+            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
+            try {
+                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '2' and bk.kode_barang = '" + kode_barang + "'";
+                java.sql.Connection conn = (Connection) Koneksi.configDB();
+                java.sql.Statement stm = conn.createStatement();
+                java.sql.ResultSet res = stm.executeQuery(sql);
+                while (res.next()) {
+                    String sat = res.getString("nama_konversi");
+                    String sat2 = sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
+                    System.out.println(sat2);
+                }
+                res.close();
+                conn.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Eror" + e);
+            }
+        } else if ((evt.getKeyCode() == KeyEvent.VK_3 || evt.getKeyCode() == KeyEvent.VK_NUMPAD3) && tbl_Penjualan.getSelectedColumn() == 4) {
+            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
+            try {
+                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '3' and bk.kode_barang = '" + kode_barang + "'";
+                java.sql.Connection conn = (Connection) Koneksi.configDB();
+                java.sql.Statement stm = conn.createStatement();
+                java.sql.ResultSet res = stm.executeQuery(sql);
+                while (res.next()) {
+                    String sat = res.getString("nama_konversi");
+                    String sat2 = "2. " + sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 4);
-                    //harga
-                    int jml = res.getInt("jumlah_konversi");
-                    tbl_Penjualan.setValueAt(this.harga, tbl_Penjualan.getSelectedRow(), 7);
+                    System.out.println(sat2);
                 }
                 res.close();
                 conn.close();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
-        } //LOKASI
-        else if (evt.getKeyCode() == KeyEvent.VK_1 && tbl_Penjualan.getSelectedColumn() == 3) {
-            System.out.println("ini alt");
+        } else if ((evt.getKeyCode() == KeyEvent.VK_3 || evt.getKeyCode() == KeyEvent.VK_NUMPAD3) && tbl_Penjualan.getSelectedColumn() == 6) {
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
-                //select l.kode_lokasi, l.nama_lokasi from lokasi l, barang_lokasi bl where bl.kode_barang = '" + kode_barang + "'
-                String sql = "select nama_lokasi from lokasi l join barang_lokasi bl on bl.kode_lokasi = l.kode_lokasi where bl.kode_lokasi = '1' and bl.kode_barang = '" + kode_barang + "'";
+                String sql = "select nama_konversi from konversi k join barang_konversi bk on bk.kode_konversi = k.kode_konversi where bk.identitas_konversi = '3' and bk.kode_barang = '" + kode_barang + "'";
                 java.sql.Connection conn = (Connection) Koneksi.configDB();
                 java.sql.Statement stm = conn.createStatement();
                 java.sql.ResultSet res = stm.executeQuery(sql);
                 while (res.next()) {
-                    String lok = res.getString("nama_lokasi");
-                    String lok2 = lok;
-                    tbl_Penjualan.setValueAt(lok2, tbl_Penjualan.getSelectedRow(), 3);
-                    System.out.println(lok2);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_2 && tbl_Penjualan.getSelectedColumn() == 3) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-                String sql = "select nama_lokasi from lokasi l join barang_lokasi bl on bl.kode_lokasi = l.kode_lokasi where bl.kode_lokasi = '2' and bl.kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("nama_lokasi");
-                    String lok2 = lok;
-                    tbl_Penjualan.setValueAt(lok2, tbl_Penjualan.getSelectedRow(), 3);
-                    System.out.println(lok2);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_3 && tbl_Penjualan.getSelectedColumn() == 3) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-                String sql = "select nama_lokasi from lokasi l join barang_lokasi bl on bl.kode_lokasi = l.kode_lokasi where bl.kode_lokasi = '4' and bl.kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("nama_lokasi");
-                    String lok2 = lok;
-                    tbl_Penjualan.setValueAt(lok2, tbl_Penjualan.getSelectedRow(), 3);
-                    System.out.println(lok2);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-
-        } else if (evt.getKeyCode() == KeyEvent.VK_4 && tbl_Penjualan.getSelectedColumn() == 3) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-                String sql = "select nama_lokasi from lokasi l join barang_lokasi bl on bl.kode_lokasi = l.kode_lokasi where bl.kode_lokasi = '5' and bl.kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("nama_lokasi");
-                    String lok2 = lok;
-                    tbl_Penjualan.setValueAt(lok2, tbl_Penjualan.getSelectedRow(), 3);
-                    System.out.println(lok2);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_5 && tbl_Penjualan.getSelectedColumn() == 3) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-                String sql = "select nama_lokasi from lokasi l join barang_lokasi bl on bl.kode_lokasi = l.kode_lokasi where bl.kode_lokasi = '6' and bl.kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("nama_lokasi");
-                    String lok2 = lok;
-                    tbl_Penjualan.setValueAt(lok2, tbl_Penjualan.getSelectedRow(), 3);
-                    System.out.println(lok2);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-        } //HARGA
-        else if (evt.getKeyCode() == KeyEvent.VK_1 && tbl_Penjualan.getSelectedColumn() == 6) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-
-                //select l.kode_lokasi, l.nama_lokasi from lokasi l, barang_lokasi bl where bl.kode_barang = '" + kode_barang + "'
-                String sql = "select harga_jual_1_barang"
-                        + ", harga_jual_2_barang, harga_jual_3_barang from barang where kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("harga_jual_1_barang");
-                    String lok2 = res.getString("harga_jual_2_barang");
-                    String lok3 = res.getString("harga_jual_3_barang");
-                    //  String []lok4 = {lok,lok2,lok3}; 
-                    tbl_Penjualan.setValueAt(lok, tbl_Penjualan.getSelectedRow(), 6);
-                    System.out.println(lok);
-                    int harga1 = res.getInt("harga_jual_1_barang");
-                    double qty = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
-                    double harga_konversi = harga1 * qty;
-                    tbl_Penjualan.setValueAt(harga_konversi, tbl_Penjualan.getSelectedRow(), 7);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_2 && tbl_Penjualan.getSelectedColumn() == 6) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-
-                //select l.kode_lokasi, l.nama_lokasi from lokasi l, barang_lokasi bl where bl.kode_barang = '" + kode_barang + "'
-                String sql = "select harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang from barang where kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("harga_jual_1_barang");
-                    String lok2 = res.getString("harga_jual_2_barang");
-                    String lok3 = res.getString("harga_jual_3_barang");
-                    //  String []lok4 = {lok,lok2,lok3}; 
-                    tbl_Penjualan.setValueAt(lok2, tbl_Penjualan.getSelectedRow(), 6);
-                    System.out.println(lok2);
-                    int harga1 = res.getInt("harga_jual_2_barang");
-                    double qty = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
-                    double harga_konversi = harga1 * qty;
-                    tbl_Penjualan.setValueAt(harga_konversi, tbl_Penjualan.getSelectedRow(), 7);
-                }
-                res.close();
-                conn.close();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Eror" + e);
-            }
-        } else if (evt.getKeyCode() == KeyEvent.VK_3 && tbl_Penjualan.getSelectedColumn() == 6) {
-            System.out.println("ini alt");
-            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
-            try {
-                //select l.kode_lokasi, l.nama_lokasi from lokasi l, barang_lokasi bl where bl.kode_barang = '" + kode_barang + "'
-                String sql = "select harga_jual_1_barang, harga_jual_2_barang, harga_jual_3_barang from barang where kode_barang = '" + kode_barang + "'";
-                java.sql.Connection conn = (Connection) Koneksi.configDB();
-                java.sql.Statement stm = conn.createStatement();
-                java.sql.ResultSet res = stm.executeQuery(sql);
-                while (res.next()) {
-                    String lok = res.getString("harga_jual_1_barang");
-                    String lok2 = res.getString("harga_jual_2_barang");
-                    String lok3 = res.getString("harga_jual_3_barang");
-                    //  String []lok4 = {lok,lok2,lok3}; 
-                    tbl_Penjualan.setValueAt(lok3, tbl_Penjualan.getSelectedRow(), 6);
-                    System.out.println(lok3);
-                    int harga1 = res.getInt("harga_jual_3_barang");
-                    double qty = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
-                    double harga_konversi = harga1 * qty;
-                    tbl_Penjualan.setValueAt(harga_konversi, tbl_Penjualan.getSelectedRow(), 7);
+                    String sat = res.getString("nama_konversi");
+                    String sat2 = "2. " + sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
+                    System.out.println(sat2);
                 }
                 res.close();
                 conn.close();
@@ -2342,6 +2226,20 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 
         loadNumberTable();
 
+    }
+
+    void clear() {
+        DefaultTableModel t = (DefaultTableModel) tbl_Penjualan.getModel();
+        t.setRowCount(0);
+        t.addRow(new Object[]{"", "", "", "", "", "", ""});
+
+//    private void txt_diskonRpKeyTyped(java.awt.event.KeyEvent evt) {
+//        char enter = evt.getKeyChar();
+//        if (!(Character.isDigit(enter))) {
+//            evt.consume();
+//        }
+//    }
+//    private void txt_dpKeyTyped(java.awt.event.KeyEvent evt) {
 
     }//GEN-LAST:event_tbl_PenjualanKeyPressed
 
@@ -2393,217 +2291,474 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
         return idpegawai;
     }
 
-    private double getKodeLokasi(int baris) {
-        TableModel tabelModel;
-        tabelModel = tbl_Penjualan.getModel();
-        tmpLokasi = tbl_Penjualan.getValueAt(baris, 3).toString();
-        try {
-
-            String sql = "SELECT * FROM `lokasi` WHERE nama_lokasi LIKE '" + tmpLokasi + "'";
-
-            java.sql.Connection conn = Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                tmpKodeLokasi = res.getInt("kode_lokasi");
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-        return tmpKodeLokasi;
-    }
-
-    private double getKonvPcs(int baris) {
-        TableModel tabelModel;
-        tabelModel = tbl_Penjualan.getModel();
-        String tmpNamaKonv = tbl_Penjualan.getValueAt(baris, 4).toString();
-        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
-        try {
-
-            String sql = "SELECT * FROM barang_konversi bk, konversi k"
-                    + " WHERE k.kode_konversi = bk.kode_konversi"
-                    + " and bk.kode_barang = " + tmpKodeBarang
-                    + " and k.nama_konversi LIKE '" + tmpNamaKonv + "'";
-
-            java.sql.Connection conn = Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                tmpKonvPcs = res.getDouble("bk.jumlah_konversi");
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-        return tmpKonvPcs;
-    }
-
-    private void getHargaJual(int baris) {
-        TableModel tabelModel;
-        tabelModel = tbl_Penjualan.getModel();
-        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
-        try {
-
-            String sql = "SELECT * FROM `barang` WHERE kode_barang LIKE '" + tmpKodeBarang + "'";
-
-            java.sql.Connection conn = Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                tmpHJ1 = res.getInt("harga_jual_1_barang");
-                tmpHJ2 = res.getInt("harga_jual_2_barang");
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-    }
-
-    private void getQtyTambah(int baris) {
-        TableModel tabelModel;
-        tabelModel = tbl_Penjualan.getModel();
-        int tmpJumlah = Integer.parseInt(tbl_Penjualan.getValueAt(baris, 5).toString());
-        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
-        double tmpJmlKonv = getKonvPcs(baris);
-        try {
-
-            String sql = "SELECT * FROM barang"
-                    + " WHERE kode_barang = " + tmpKodeBarang;
-
-            java.sql.Connection conn = Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                tmpKel = res.getString("id_kelompok");
-            }
-//            if (tmpKel.equalsIgnoreCase("2")) {
-//                jmlKonv = tmpJmlKonv - 5;
-//            } else {
-            jmlKonv = tmpJmlKonv;
-//            }
-            jumlahTambah = tmpJumlah * jmlKonv;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-    }
-
-    private void getQty(int baris) {
-        TableModel tabelModel;
-        tabelModel = tbl_Penjualan.getModel();
-        tmpKodeBarang = tbl_Penjualan.getValueAt(baris, 1).toString();
-        try {
-
-            String sql = "SELECT * FROM barang_lokasi WHERE"
-                    + " kode_barang = " + tmpKodeBarang
-                    + " AND kode_lokasi = " + getKodeLokasi(baris);
-
-            java.sql.Connection conn = Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                jmlQty = res.getDouble("jumlah");
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }
-    }
-
     private void lbl_SaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbl_SaveMouseClicked
-        SaveData();
-
+        simpan_data();
     }//GEN-LAST:event_lbl_SaveMouseClicked
 
-    private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comCustomerActionPerformed
-/*        int kode_customer = 0;
-//        TableModel tabelModel;
-        String nama_awal = String.valueOf(comCustomer.getSelectedItem());
-        String[] split = new String[2];
-//        System.out.println("Nilai comCustomer adalah " + comCustomer.getSelectedItem());
-        if (comCustomer.getSelectedItem() != null) {
-            split = nama_awal.split("-");
-        }
+    void simpan_data() {
+
         try {
-            String sql = "select * from customer where nama_customer = '" + split[1].trim() + "'";
-            this.nama_customer = split[0];
+//            SimpleDateFormat format_tanggal = new SimpleDateFormat("yyyy-MM-dd");
+//            String date = format_tanggal.format(tgl_inv.getDate());
+            getKodeCustom();
+            int idPenjualan = getKodePenjual();
+//            getKodeUang();
+
+            tempK = 0;
+            tempL = 0;
+            tempJ = 0;
+            tempJQ = 0;
+
+            getQtyTambahTemp(txt_faktur.getText());
+
+            Koneksi Koneksi = new Koneksi();
+            Connection con = Koneksi.configDB();
+            Statement st = con.createStatement();
+
+//            String sql = "SELECT * FROM barang_lokasi WHERE"
+//                    + " kode_barang = ' " + tmpKodeBarang + "'"
+//                    + " AND kode_lokasi = " + tempL;
+//            java.sql.ResultSet res = st.executeQuery(sql);
+//            while (res.next()) {
+//                tempJQ = res.getDouble("jumlah");
+//            }
+//            String sql = "UPDATE barang_lokasi SET"
+//                    + " jumlah = " + (tempJQ - tempJ)
+//                    + " WHERE"
+//                    + " kode_barang = " + tempK
+//                    + " AND kode_lokasi = " + tempL;
+//            st.executeUpdate(sql);
+            int totale = Integer.parseInt(txt_tbl_total.getText()) * -1;
+
+            SimpleDateFormat format_tanggal = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String date = format_tanggal.format(System.currentTimeMillis());
+
+            String sql = "DELETE FROM penjualan "
+                    + "WHERE no_faktur_penjualan = '" + txt_faktur.getText() + "'";
+
+            st.executeUpdate(sql);
+            sql = "DELETE FROM penjualan_detail "
+                    + "WHERE no_faktur_penjualan = '" + txt_faktur.getText() + "'";
+
+            st.executeUpdate(sql);
+
+            sql = "insert into penjualan(no_faktur_penjualan, tgl_penjualan, keterangan_penjualan, status_verifikasi, no_faktur_order , id_top, staff, kode_customer, "
+                    + "kode_salesman, kode_pegawai, verifikasi_pegawai, tgl_validasi_penjualan, kode_pegawai_validasi, pembaran_udah_bayar, "
+                    + "pembayaran_aktif, potongan, denda_salesman, jumlah_print, print_gudang, print_jalan,"
+                    + "no_surat_jalan, tgl_surat_jalan, print_nota_jalan, tgl_nota_jalan, status_toko, tgl_bg_penjualan, "
+                    + "faktur_tempo_bg_penjualan, faktur_bg_penjualan, kode_pegawai_bg_penjualan, no_seri_bg, totale, kembali, tgl_filter_tutup_buku)"
+                    + "values('"
+                    + txt_faktur.getText() + "','"
+                    + date + "','"
+                    + txt_keterangan.getText() + "','"
+                    + 0 + "','" //nilai true false
+                    + 0 + "','"
+                    + 0 + "','" //id nya int comTOP.getSelectedItem()
+                    + comStaff.getSelectedItem() + "','"
+                    + txt_Nama + "','" //id nya int idCustomer
+                    + 0 + "','" //id nya int idSalesman
+                    + 0 + "','" //id nya int idStaff
+                    + 0 + "','"
+                    + "0000-00-00" + "','"
+                    + 0 + "','"
+                    + totale + "','"
+                    + txt_tbl_total.getText() + "','"
+                    + 0 + "','"
+                    + 0 + "','"
+                    + 0 + "','"
+                    + 0 + "','"
+                    + 0 + "','"
+                    + "0" + "','"
+                    + date + "','"
+                    + 0 + "','"
+                    + date + "','"
+                    + 0 + "','"
+                    + date + "','"
+                    + date + "','"
+                    + "0" + "','"
+                    + 0 + "','"
+                    + "0" + "','"
+                    + txt_tbl_total.getText() + "','"
+                    + 0 + "','"
+                    + date + "');";
+            System.out.println("Mouse simpan pertama = " + sql);
+            int dbq = st.executeUpdate(sql);
+
+            int baris = tbl_Penjualan.getRowCount();
+            System.out.println("baris = " + baris);
+            TableModel tabelModel;
+            tabelModel = tbl_Penjualan.getModel();
+
+            for (int i = 0; i < baris; i++) {
+                //      getHargaJual(i);
+                sql = "insert into penjualan_detail( id_penjualan, no_faktur_penjualan, kode_barang, nama_barang_edit, "
+                        + "kode_lokasi, jumlah_barang, jumlah_per_pcs, max_return, jenis_harga, "
+                        + "harga_penjualan, harga_jual, harga_revisi, hpp, harga_jual1, harga_jual2, total_harga, "
+                        + "id_top, komisi, pembayaran_penjualan, kode_barang_konversi, status_toko)"
+                        + "value" + "('"
+                        + idPenjualan + "','"
+                        + txt_faktur.getText() + "','"
+                        + tbl_Penjualan.getValueAt(i, 1).toString() + "','"
+                        + tbl_Penjualan.getValueAt(i, 2).toString() + "','"
+                        + getKodeLokasi(i) + "','"
+                        + tbl_Penjualan.getValueAt(i, 5).toString() + "','"
+                        + getKonvPcs(i) + "','"
+                        + 0 + "','"
+                        + "0" + "','"
+                        + 0 + "','"
+                        + 0 + "','"
+                        + 0 + "','"
+                        + 0 + "','"
+                        + tmpHJ1 + "','"
+                        + tmpHJ2 + "','"
+                        + txt_tbl_total.getText() + "','"
+                        + 0 + "','"
+                        + 0 + "','"
+                        + 0 + "','"
+                        + 0 + "','"
+                        + 0 + "')";
+
+                int dbq2 = st.executeUpdate(sql);
+                //     System.out.println("Mouse simpan kedua = "+sql);
+
+                if (dbq2 == 1) {
+                    JOptionPane.showMessageDialog(null, "data barang ke " + (i + 1) + " sudah ditambahkan ke database", "informasi", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+
+            for (int i = 0; i < baris; i++) {
+                getQty(i);
+                System.out.println("Qty = " + jmlQty);
+                getQtyTambah(i);
+                System.out.println("Qty Tambah = " + jumlahTambah);
+                double kodelokasi = getKodeLokasi(i);
+                sql = "UPDATE barang_lokasi SET"
+                        + " jumlah = " + (jmlQty + jumlahTambah)
+                        + " WHERE"
+                        + " kode_barang = " + tbl_Penjualan.getValueAt(i, 1)
+                        + " AND kode_lokasi = " + kodelokasi;
+
+                int dbq3 = st.executeUpdate(sql);
+
+                if (dbq3 == 1) {
+                    JOptionPane.showMessageDialog(null, "data barang ke " + (i + 1) + " jumlah qty ditambah " + jumlahTambah, "informasi", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+            if (dbq == 1) {
+                JOptionPane.showMessageDialog(null, "data sudah ditambahkan ke database", "informasi", JOptionPane.INFORMATION_MESSAGE);
+                con.close();
+            }
+
+            sql = "insert into customer( nama_customer, alamat_customer, rekening_customer)"
+                    + "value('" + txt_Nama.getText() + "','" + txt_Alamat.getText() + "');";
+//            System.out.println(sql);
+            st.executeUpdate(sql);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "data tidak dimasukkan ke database" + e, "informasi", JOptionPane.INFORMATION_MESSAGE);
+        }
+//        finally {
+//
+//        }
+    }
+
+    private void comCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comCustomerActionPerformed
+        try {
+            String sql = " select c.kode_customer, c.nama_customer, c.alamat_customer, s.nama_salesman "
+                    + " from customer c, salesman s "
+                    + " where c.kode_salesman = s.kode_salesman "
+                    + " and c.kode_customer = '" + comCustomer.getSelectedItem() + "'";
+//            String sql = "select * from customer where kode_customer = '" + comCustomer.getSelectedItem() + "'";
             java.sql.Connection conn = (Connection) Koneksi.configDB();
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
-                String kode = res.getString(1);
                 String nama = res.getString(2);
-                String alamat = res.getString(4);
-//                    comCustomer.addItem(kode);
-//                comCustomer.setSelectedItem(kode);
+                String alamat = res.getString(3);
+                comCustomer.setSelectedItem(res.getString(1));
+                comSalesman.setSelectedItem(res.getString(4));
                 txt_Nama.setText(nama);
                 txt_Alamat.setText(alamat);
             }
+            txt_keterangan.requestFocus();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Eror" + e);
-        }*/
-        try {
-            String sql = "select * from customer where kode_customer = '" + comCustomer.getSelectedItem() + "'";
-            java.sql.Connection conn = (Connection) Koneksi.configDB();
-            java.sql.Statement stm = conn.createStatement();
-            java.sql.ResultSet res = stm.executeQuery(sql);
-            while (res.next()) {
-                String nama = res.getString(2);
-                String alamat = res.getString(4);
-                //String rek = res.getString(9);
-                comCustomer.setSelectedItem(res.getString(1));
-                txt_Nama.setText(nama);
-                txt_Alamat.setText(alamat);
-                }
-            } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
     }//GEN-LAST:event_comCustomerActionPerformed
+
+    void load_dari_nama_barang() {
+        int kode_barang = 0;
+        int baris = tbl_Penjualan.getRowCount();
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        int selectedRow = tbl_Penjualan.getSelectedRow();
+        String nama_awal = String.valueOf(comTableBarang.getSelectedItem());
+        String[] split = new String[2];
+        System.out.println("nilai comTable barang adalah " + comTableBarang.getSelectedItem());
+        if (comTableBarang.getSelectedItem() != null) {
+            split = nama_awal.split("-");
+        }
+        try {
+            String sql = "select * from barang where kode_barang = '" + split[0] + "'";
+            this.kode_barang = split[0];
+            System.out.println(sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+
+                String kode = res.getString(1);
+                int harga = Math.round(res.getFloat(11));
+                int jumlah = 1;
+//                int diskon = 0;
+                loadComTableSatuan();
+                String konv = comTableKonv.getSelectedItem().toString();
+//                int diskonp, diskonp2, totaldiskon;
+                int jumlah1, harga1, subtotal, totaljadi;
+
+                if (selectedRow != -1) {
+                    tbl_Penjualan.setValueAt(kode, selectedRow, 1);
+                    tbl_Penjualan.setValueAt(res.getString("nama_barang"), selectedRow, 2);
+                    tbl_Penjualan.setValueAt(konv, selectedRow, 4);
+                    tbl_Penjualan.setValueAt(jumlah, selectedRow, 5);
+                    tbl_Penjualan.setValueAt(harga, selectedRow, 6);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 8);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 9);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 10);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 11);
+                    tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
+//                    int i = selectedRow;
+//                    konv = comTableKonv.getSelectedItem().toString();
+
+                    jumlah1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+                    harga1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
+//                    diskonp = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
+//                    diskonp2 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
+                    tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
+                    subtotal = (int) (jumlah1 * harga1 * tmppcs);
+//                    totaldiskon = ((diskonp + diskonp2) * subtotal / 100);
+                    totaljadi = subtotal;
+                    tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+                    tabelModel.setValueAt(totaljadi, tbl_Penjualan.getSelectedRow(), 9);
+                    Tempharga = res.getInt(11);
+                    System.out.println("temharga = " + Tempharga);
+//                    loadComTableSatuan();
+
+                }
+                TableColumnModel m = tbl_Penjualan.getColumnModel();
+//                m.getColumn(5).setCellRenderer(new Currency_Column());
+                m.getColumn(6).setCellRenderer(new Currency_Column());
+                m.getColumn(7).setCellRenderer(new Currency_Column());
+                m.getColumn(8).setCellRenderer(new Currency_Column());
+                m.getColumn(9).setCellRenderer(new Currency_Column());
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+            //System.out.println("asdasdasdasdasdasd");
+            //e.printStackTrace();
+        }
+
+        try {
+            String sql = "select k.nama_konversi, k.kode_konversi from konversi k, barang_konversi bk where k.kode_konversi = bk.kode_konversi and bk.kode_barang = '" + kode_barang + "'";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            String Konv = "";
+//            System.out.println("test =" +sql);
+//            System.out.println("k =" +kode_barang);
+//            System.out.println("Select =" + comTableKonv.getSelectedItem());
+            while (res.next()) {
+                Konv = res.getString(1);
+                comTableKonv.addItem(Konv);
+                System.out.println("Konv =" + Konv);
+//                System.out.println("echo : " + tbl_Penjualan.getValueAt(selectedRow, 2).toString());
+                tbl_Penjualan.setValueAt(comTableKonv.getSelectedItem(), selectedRow, 4);
+
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror nyaaaaa: ");
+            e.printStackTrace();
+        }
+//        txt_inv.requestFocus();
+    }
+
+    void load_dari_kode_barang() {
+        int kode_barang = 0;
+        int baris = tbl_Penjualan.getRowCount();
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        int selectedRow = tbl_Penjualan.getSelectedRow();
+        String nama_awal = String.valueOf(comTableKode.getSelectedItem());
+        String[] split = new String[2];
+        System.out.println("nilai comTable barang adalah " + comTableKode.getSelectedItem());
+        if (comTableKode.getSelectedItem() != null) {
+            split = nama_awal.split("-");
+        }
+        try {
+            String sql = "select * from barang where kode_barang = '" + split[0] + "'";
+            this.kode_barang = split[0];
+            System.out.println(sql);
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            while (res.next()) {
+
+                String kode = res.getString(1);
+                int harga = Math.round(res.getFloat(11));
+                String jumlah = "1";
+//                String diskon = "0";
+                loadComTableSatuan();
+                String konv = comTableKonv.getSelectedItem().toString();
+//                int diskonp, diskonp2, totaldiskon;
+                int jumlah1, harga1, subtotal, totaljadi;
+
+                if (selectedRow != -1) {
+                    tbl_Penjualan.setValueAt(kode, selectedRow, 1);
+                    tbl_Penjualan.setValueAt(res.getString("nama_barang"), selectedRow, 2);
+                    tbl_Penjualan.setValueAt(konv, selectedRow, 4);
+                    tbl_Penjualan.setValueAt(jumlah, selectedRow, 5);
+                    tbl_Penjualan.setValueAt(harga, selectedRow, 6);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 8);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 9);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 10);
+//                    tbl_Penjualan.setValueAt(diskon, selectedRow, 11);
+                    tbl_Penjualan.setValueAt(comTableLokasi.getItemAt(0), selectedRow, 3);
+//                    int i = selectedRow;
+//                    konv = comTableKonv.getSelectedItem().toString();
+
+                    jumlah1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+                    harga1 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 6).toString());
+//                    diskonp = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
+//                    diskonp2 = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
+                    tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
+                    subtotal = (int) (jumlah1 * harga1 * tmppcs);
+//                    totaldiskon = ((diskonp + diskonp2) * subtotal / 100);
+                    totaljadi = subtotal;
+                    tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+                    tabelModel.setValueAt(totaljadi, tbl_Penjualan.getSelectedRow(), 9);
+                    Tempharga = res.getInt(11);
+                    System.out.println("temharga = " + Tempharga);
+//                    loadComTableSatuan();
+
+                }
+                TableColumnModel m = tbl_Penjualan.getColumnModel();
+//                m.getColumn(5).setCellRenderer(new Currency_Column());
+                m.getColumn(6).setCellRenderer(new Currency_Column());
+                m.getColumn(7).setCellRenderer(new Currency_Column());
+                m.getColumn(8).setCellRenderer(new Currency_Column());
+                m.getColumn(9).setCellRenderer(new Currency_Column());
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror" + e);
+            //System.out.println("asdasdasdasdasdasd");
+            //e.printStackTrace();
+        }
+
+        try {
+            String sql = "select k.nama_konversi, k.kode_konversi from konversi k, barang_konversi bk where k.kode_konversi = bk.kode_konversi and bk.kode_barang = '" + kode_barang + "'";
+            java.sql.Connection conn = (Connection) Koneksi.configDB();
+            java.sql.Statement stm = conn.createStatement();
+            java.sql.ResultSet res = stm.executeQuery(sql);
+            String Konv = "";
+//            System.out.println("test =" +sql);
+//            System.out.println("k =" +kode_barang);
+//            System.out.println("Select =" + comTableKonv.getSelectedItem());
+            while (res.next()) {
+                Konv = res.getString(1);
+                comTableKonv.addItem(Konv);
+                System.out.println("Konv =" + Konv);
+//                System.out.println("echo : " + tbl_Penjualan.getValueAt(selectedRow, 2).toString());
+                tbl_Penjualan.setValueAt(comTableKonv.getSelectedItem(), selectedRow, 4);
+
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Eror nyaaaaa: ");
+            e.printStackTrace();
+        }
+    }
+
+    void loadComboNama(String key) {
+        Runnable doHighlight = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("ini load combo nama");
+                try {
+                    String sql = "select concat(kode_barang,\"-\",nama_barang) as gabung from barang where kode_barang ='" + key + "' OR nama_barang like '%" + key + "%'";
+                    System.out.println(sql);
+                    java.sql.Connection conn = (Connection) Koneksi.configDB();
+                    java.sql.Statement stm = conn.createStatement();
+                    java.sql.ResultSet res = stm.executeQuery(sql);
+                    System.out.println("ini sql com kode nama " + sql);
+                    kode_nama_arr.clear();
+                    kode_nama_arr.add("");
+                    while (res.next()) {
+                        String gabung = res.getString("gabung");
+                        kode_nama_arr.add(gabung);
+                        item++;
+                    }
+                    if (item == 0) {
+                        item = 1;
+                    }
+                    comTableBarang.setModel(new DefaultComboBoxModel(kode_nama_arr.toArray()));
+                    ((JTextComponent) comTableBarang.getEditor().getEditorComponent()).setText(key);
+                    conn.close();
+                    res.close();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Eror" + e);
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        SwingUtilities.invokeLater(doHighlight);
+    }
+
+    void loadComboKode(String key) {
+        Runnable doHighlight = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("ini load combo kode");
+                try {
+                    String sql = "select concat(kode_barang,\"-\",nama_barang) as gabung from barang where kode_barang ='" + key + "' OR nama_barang like '%" + key + "%'";
+                    System.out.println(sql);
+                    java.sql.Connection conn = (Connection) Koneksi.configDB();
+                    java.sql.Statement stm = conn.createStatement();
+                    java.sql.ResultSet res = stm.executeQuery(sql);
+                    System.out.println("ini sql com kode " + sql);
+                    kode_nama_arrk.clear();
+                    kode_nama_arrk.add("");
+                    while (res.next()) {
+                        String gabung = res.getString("gabung");
+                        kode_nama_arrk.add(gabung);
+                        itemk++;
+                    }
+                    if (itemk == 0) {
+                        itemk = 1;
+                    }
+                    comTableKode.setModel(new DefaultComboBoxModel(kode_nama_arrk.toArray()));
+                    ((JTextComponent) comTableKode.getEditor().getEditorComponent()).setText(key);
+                    conn.close();
+                    res.close();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Eror" + e);
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        SwingUtilities.invokeLater(doHighlight);
+    }
 
     private void lbl_SaveMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbl_SaveMouseEntered
         // TODO add your handling code here:
     }//GEN-LAST:event_lbl_SaveMouseEntered
 
-    private void editable() throws ParseException {
-
-        String string = "2018-07-30 17:00:00";
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        Date date = new Date();
-        Date date2 = format.parse(string);
-
-        if (date.after(date2)) {
-            comCustomer.setEnabled(false);
-            comOrder.setEnabled(false);
-            comSalesman.setEnabled(false);
-            comStaff.setEditable(false);
-            comTOP.setEnabled(false);
-            txt_faktur.setEditable(false);
-            txt_tanggal.setEditable(false);
-            checkverif.setEnabled(false);
-            txt_item.setEditable(false);
-            txt_jumQty.setEditable(false);
-            txt_tbl_total.setEditable(false);
-            txt_keterangan.setEditable(false);
-            tbl_Penjualan.setEnabled(false);
-        } else {
-            comCustomer.setEnabled(true);
-            comOrder.setEnabled(true);
-            comSalesman.setEnabled(true);
-            comStaff.setEditable(true);
-            comTOP.setEnabled(true);
-            txt_faktur.setEditable(true);
-            txt_tanggal.setEditable(true);
-            checkverif.setEnabled(true);
-            txt_item.setEditable(true);
-            txt_jumQty.setEditable(true);
-            txt_tbl_total.setEditable(true);
-            txt_keterangan.setEditable(true);
-            tbl_Penjualan.setEnabled(true);
-        }
-    }
-
-
     private void lbl_nextMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbl_nextMouseClicked
 //        boolean isi = false;
 //        do {
 //            try {
-//                String sql = "select no_faktur_pembelian from pembelian ORDER BY no_faktur_pembelian DESC";
+//                String sql = "select no_faktur_penjualan from penjualan ORDER BY no_faktur_penjualan DESC";
 //                java.sql.Connection conn = (Connection) Koneksi.configDB();
 //                java.sql.Statement stm = conn.createStatement();
 //                java.sql.ResultSet res = stm.executeQuery(sql);
@@ -2617,13 +2772,13 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 //                boolean statusIsi = tempRs.previous();
 //                System.out.println(statusIsi);
 //                if (statusIsi) {
-//                    String noNota = tempRs.getString("no_faktur_pembelian");
-//                    txt_faktur.setText(noNota);
-//                    System.out.println(noNota);
+//                    String noFaktur = tempRs.getString("no_faktur_penjualan");
+//                    txt_faktur.setText(noFaktur);
+//                    System.out.println(noFaktur);
 ////                    System.out.println("prev");
-//                    loadForm(noNota);
-//                    loadTable(noNota);
-//                    getQtyTambahTemp(txt_noNota.getText());
+//                    loadForm(noFaktur);
+//                    loadTable(noFaktur);
+//                    getQtyTambahTemp(txt_faktur.getText());
 //                    break;
 //
 //                } else {
@@ -2635,16 +2790,61 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 //                JOptionPane.showMessageDialog(this, "ERROR: \n" + ex.getMessage(),
 //                        "Kesalahan", JOptionPane.WARNING_MESSAGE);
 //            } catch (ParseException ex) {
-//                Logger.getLogger(Pembelian_Transaksi.class.getName()).log(Level.SEVERE, null, ex);
+//                Logger.getLogger(Penjualan_Penjualan.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-//        } while (evt.equals(txt_noNota != null));
+//        } while (evt.equals(txt_faktur != null));
     }//GEN-LAST:event_lbl_nextMouseClicked
+
+    void baru() {
+
+        //initComponents();
+//        txt_diskonRp.setEditable(false);
+        loadCustomer();
+        loadTop();
+        loadSalesman();
+        loadStaff();
+//        loadJenisKeuangan();
+        loadComTableBarang();
+        loadcomTableKode();
+        loadNumberTable();
+        loadComTableSatuan();
+        loadComTableLokasi();
+        autonumber();
+        AturlebarKolom();
+        uangtotal();
+        uangdp();
+
+        if (!ini_baru) {
+            DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+            TableModel tabelModel;
+            tabelModel = tbl_Penjualan.getModel();
+            model.addRow(new Object[]{"", "", "", "", "0", "", "0", "0", "0"});
+            ini_baru = true;
+        }
+        enable_true();
+    }
+
+    void enable_true() {
+        comCustomer.setEnabled(true);
+        comOrder.setEnabled(true);
+        comTOP.setEnabled(true);
+        comSalesman.setEnabled(true);
+        comStaff.setEnabled(true);
+//        txt_inv.setEditable(true);
+//        tgl_inv.setEnabled(true);
+//        txt_diskon.setEditable(true);
+//        txt_diskonRp.setEditable(true);
+//        com_jenisKeuangan.setEnabled(true);
+//        txt_dp.setEditable(true);
+        txt_keterangan.setEditable(true);
+        tbl_Penjualan.setEnabled(true);
+    }
 
     private void lbl_prevMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbl_prevMouseClicked
 //        boolean isi = false;
 //        do {
 //            try {
-//                String sql = "select no_faktur_pembelian from pembelian ORDER BY no_faktur_pembelian DESC";
+//                String sql = "select no_faktur_penjualan from penjualan ORDER BY no_faktur_penjualan DESC";
 //                java.sql.Connection conn = (Connection) Koneksi.configDB();
 //                java.sql.Statement stm = conn.createStatement();
 //                java.sql.ResultSet res = stm.executeQuery(sql);
@@ -2656,11 +2856,11 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 //                    tempRs = res;
 //                }
 //                if (tempRs.next()) {
-//                    String noNota = tempRs.getString("no_faktur_pembelian");
-//                    txt_noNota.setText(noNota);
-//                    System.out.println(noNota);
-//                    loadForm(noNota);
-//                    loadTable(noNota);
+//                    String noFaktur = tempRs.getString("no_faktur_penjualan");
+//                    txt_faktur.setText(noFaktur);
+//                    System.out.println(noFaktur);
+//                    loadForm(noFaktur);
+//                    loadTable(noFaktur);
 //                    break;
 //
 //                } else {
@@ -2671,7 +2871,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
 //                JOptionPane.showMessageDialog(this, "ERROR: \n" + ex.toString(),
 //                        "Kesalahan", JOptionPane.WARNING_MESSAGE);
 //            }
-//        } while (evt.equals(txt_noNota != null));
+//        } while (evt.equals(txt_faktur != null));
 //        tempPrev++;
 //    }                                      
 //
@@ -2683,23 +2883,38 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_lbl_prevMouseClicked
 
     private void tbl_PenjualanKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbl_PenjualanKeyReleased
-        System.out.println("key released");
-        if (tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 7) != ""
-                && tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 5) != ""
-                && tbl_Penjualan.getRowCount() != -1
-                && (tbl_Penjualan.getSelectedColumn() == 0
-                || tbl_Penjualan.getSelectedColumn() == 1
-                || tbl_Penjualan.getSelectedColumn() == 2
-                || tbl_Penjualan.getSelectedColumn() == 3
-                || tbl_Penjualan.getSelectedColumn() == 4
-                || tbl_Penjualan.getSelectedColumn() == 5
-                || tbl_Penjualan.getSelectedColumn() == 6
-                || tbl_Penjualan.getSelectedColumn() == 7
-                || tbl_Penjualan.getSelectedColumn() == 8
-                || tbl_Penjualan.getSelectedColumn() == 9)) {
-            HitungSubTotal();
-            showQTY();
+        DefaultTableModel model = (DefaultTableModel) tbl_Penjualan.getModel();
+        int selectedRow = tbl_Penjualan.getSelectedRow();
+        int baris = tbl_Penjualan.getRowCount();
+        double jumlah = 0, harga = 0, harga_jadi = 0;
+        int qty = 0;
+
+        TableModel tabelModel;
+        tabelModel = tbl_Penjualan.getModel();
+        if (tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5) != null && tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5) != "") {
+            jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 7).toString());
+//        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {    // Membuat Perintah Saat Menekan Enter
+
+            jumlah = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 5).toString());
+            harga = Integer.parseInt(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 7).toString());
+//            diskon = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 8).toString());
+//            diskon1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 10).toString());
+//            diskonp = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString());
+//            diskonp1 = Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 11).toString());
+            tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
+            int subtotal = (int) (jumlah * harga * tmppcs);
+//            double diskonrp = subtotal * diskon / 100;
+//            double diskonrp1 = subtotal * diskon1 / 100;
+            double hargajadii = subtotal;
+            tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
+//            tabelModel.setValueAt(diskonrp, tbl_Penjualan.getSelectedRow(), 9);
+//            tabelModel.setValueAt(diskonrp1, tbl_Penjualan.getSelectedRow(), 11);
+            tabelModel.setValueAt(hargajadii, tbl_Penjualan.getSelectedRow(), 9);
+
+//        loadNumberTable();
         }
+        HitungSemua();
 
     }//GEN-LAST:event_tbl_PenjualanKeyReleased
 
@@ -2715,7 +2930,33 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_tbl_PenjualanKeyTyped
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        SaveData();
+        try {
+            SimpleDateFormat format_tanggal = new SimpleDateFormat("yyyy-MM-dd");
+//            String date = format_tanggal.format(tgl_inv.getDate());
+            Koneksi Koneksi = new Koneksi();
+            Connection con = Koneksi.configDB();
+
+            Statement st = con.createStatement();
+            String sql = "insert into penjualan( no_faktur_penjualan, no_faktur_customer_penjualan, tgl_penjualan,  tgl_nota_customer_penjualan,  discon_persen, discon_rp, keterangan_penjualan)"
+                    + "value('" + txt_faktur.getText() + "','" + txt_tanggal.getText() + "','" + txt_keterangan.getText() + "');";
+//            System.out.println(sql);
+            int row = st.executeUpdate(sql);
+
+            if (row == 1) {
+                JOptionPane.showMessageDialog(null, "data sudah ditambahkan ke database", "informasi", JOptionPane.INFORMATION_MESSAGE);
+                con.close();
+            }
+
+            sql = "insert into customer( nama_customer, alamat_customer, rekening_customer)"
+                    + "value('" + txt_Nama.getText() + "','" + txt_Alamat.getText() + "');";
+//            System.out.println(sql);
+            st.executeUpdate(sql);
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "data tidak dimasukkan ke database" + e, "informasi", JOptionPane.INFORMATION_MESSAGE);
+        } finally {
+
+        }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
@@ -2723,7 +2964,7 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_jLabel2MouseClicked
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
+        BersihField();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jLabel5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel5MouseClicked
@@ -2735,17 +2976,57 @@ public class Penjualan_Penjualan extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void comCustomerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comCustomerItemStateChanged
-        // TODO add your handling code here:
         tampil1 = true;
     }//GEN-LAST:event_comCustomerItemStateChanged
+
+    private void txt_keteranganKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_keteranganeranganKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            this.dispose();
+        }
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            tbl_Penjualan.requestFocus();
+        }
+    }//GEN-LAST:event_txt_keteranganeranganKeyPressed
+
+    private void tbl_PenjualanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_PenjualanMouseClicked
+        int baris = tbl_Penjualan.getSelectedRow();
+        int kolom = tbl_Penjualan.getSelectedColumn();
+
+        TableModel model = tbl_Penjualan.getModel();
+
+        int tabel = tbl_Penjualan.getRowCount();
+
+//        model.setValueAt(rptabelkembali(String.valueOf(harga)), i - 1, 6);
+        if (evt.getClickCount() == 2 && !evt.isConsumed()) {
+            evt.consume();
+            JOptionPane.showMessageDialog(null, "baris : " + baris + " kolom : " + kolom);
+
+//                System.out.println("Double Click");
+            Penjualan_LaporanPenjualan_Faktur a = new Penjualan_LaporanPenjualan_Faktur();
+            a.setVisible(true);
+
+        }
+    }//GEN-LAST:event_tbl_PenjualanMouseClicked
+
+    private void comTableBarangItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comTableBarangItemStateChanged
+        tampil = false;
+    }//GEN-LAST:event_comTableBarangItemStateChanged
+
+    private void comTableKodeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comTableKodeItemStateChanged
+        tampilk = false;
+    }//GEN-LAST:event_comTableKodeItemStateChanged
 
     private void txt_keteranganActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_keteranganActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_keteranganActionPerformed
 
-    private void txt_NamaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_NamaActionPerformed
+    private void comSalesmanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comSalesmanActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_NamaActionPerformed
+    }//GEN-LAST:event_comSalesmanActionPerformed
+
+    private void comOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comOrderActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comOrderActionPerformed
 
     private int getId_penjualan() {
         int nilai_id = 0;
