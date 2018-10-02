@@ -693,7 +693,7 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                     + "from penjualan_detail d, penjualan p, barang b, lokasi l, barang_konversi bs, konversi k "
                     + "where "
                     + "d.kode_barang = b.kode_barang and d.no_faktur_penjualan = p.no_faktur_penjualan and "
-                    + "b.kode_lokasi = l.kode_lokasi and k.kode_konversi = bs.kode_konversi and d.kode_konversi = bs.kode_konversi "
+                    + "b.kode_lokasi = l.nama_lokasi and k.kode_konversi = bs.kode_konversi and d.kode_konversi = bs.kode_konversi "
                     + "order by d.id_penjualan_detail desc";
 //            System.out.println(sql);
             java.sql.Connection conn = Koneksi.configDB();
@@ -2067,7 +2067,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             tmppcs = getKonvPcs(tbl_Penjualan.getSelectedRow());
             int subtotal = (int) (harga * jumlah * tmppcs);
             tabelModel.setValueAt(subtotal, tbl_Penjualan.getSelectedRow(), 8);
-
             HitungSemua();
             if (tabelModel.getValueAt(tbl_Penjualan.getSelectedRow(), 9).toString().equals("0")) {
                 JOptionPane.showMessageDialog(null, "Data Terakhir Tidak Boleh kosong", "", 2);
@@ -2075,7 +2074,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                 if (Double.parseDouble(tabelModel.getValueAt(tbl_Penjualan.getRowCount() - 1, 9).toString()) != 0) {
                     model.addRow(new Object[]{"", "", "", "", "", "0", "0", "0", "0"});
                 }
-
             }
         } else if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
             if (tbl_Penjualan.getRowCount() - 1 == -1) {
@@ -2104,7 +2102,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             KeyStroke f2 = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
             im.put(down, im.get(f2));
             System.out.println("asd");
-
         } else if (evt.getKeyCode() == KeyEvent.VK_DOWN && (tbl_Penjualan.getSelectedColumn() != 2)) {
             InputMap im = tbl_Penjualan.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             KeyStroke down = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
@@ -2131,6 +2128,26 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
+            } else if ((evt.getKeyCode() == KeyEvent.VK_1 || evt.getKeyCode() == KeyEvent.VK_NUMPAD1) && tbl_Penjualan.getSelectedColumn() == 6) {
+            System.out.println("ini alt");
+            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
+            try {
+                String sql = "select harga_jual_1_barang from barang b join penjualan_detail d on d.kode_barang ="
+                        + " b.kode_barang where b.id_kelompok = '1' and b.kode_barang = '" + kode_barang + "'";
+                java.sql.Connection conn = (Connection) Koneksi.configDB();
+                java.sql.Statement stm = conn.createStatement();
+                java.sql.ResultSet res = stm.executeQuery(sql);
+                while (res.next()) {
+                    String sat = res.getString("harga_jual_1_barang");
+                    String sat2 = sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
+                    System.out.println(sat2);
+                }
+                res.close();
+                conn.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Eror" + e);
+            }
         } else if ((evt.getKeyCode() == KeyEvent.VK_2 || evt.getKeyCode() == KeyEvent.VK_NUMPAD2) && tbl_Penjualan.getSelectedColumn() == 4) {
             System.out.println("ini alt");
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
@@ -2150,6 +2167,27 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Eror" + e);
             }
+        } else if ((evt.getKeyCode() == KeyEvent.VK_2 || evt.getKeyCode() == KeyEvent.VK_NUMPAD2) && tbl_Penjualan.getSelectedColumn() == 6) {
+            System.out.println("ini alt");
+            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
+            try {
+                String sql = "select harga_jual_2_barang from barang b join penjualan_detail d on d.kode_barang ="
+                        + " b.kode_barang where b.id_kelompok = '1' and b.kode_barang = '" + kode_barang + "'";
+                java.sql.Connection conn = (Connection) Koneksi.configDB();
+                java.sql.Statement stm = conn.createStatement();
+                java.sql.ResultSet res = stm.executeQuery(sql);
+                while (res.next()) {
+                    String sat = res.getString("harga_jual_2_barang");
+                    String sat2 = sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
+                    System.out.println(sat2);
+                }
+                res.close();
+                conn.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Eror" + e);
+            }
+        
         } else if ((evt.getKeyCode() == KeyEvent.VK_3 || evt.getKeyCode() == KeyEvent.VK_NUMPAD3) && tbl_Penjualan.getSelectedColumn() == 4) {
             String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
             try {
@@ -2159,8 +2197,27 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
                 java.sql.ResultSet res = stm.executeQuery(sql);
                 while (res.next()) {
                     String sat = res.getString("nama_konversi");
-                    String sat2 = "2. " + sat;
+                    String sat2 = sat;
                     tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 4);
+                    System.out.println(sat2);
+                }
+                res.close();
+                conn.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Eror" + e);
+            }
+        } else if ((evt.getKeyCode() == KeyEvent.VK_3 || evt.getKeyCode() == KeyEvent.VK_NUMPAD3) && tbl_Penjualan.getSelectedColumn() == 6) {
+            String kode_barang = String.valueOf(tbl_Penjualan.getValueAt(tbl_Penjualan.getSelectedRow(), 1));
+            try {
+                String sql = "select harga_jual_3_barang from barang b join penjualan_detail d on d.kode_barang ="
+                        + " b.kode_barang where b.id_kelompok = '1' and b.kode_barang = '" + kode_barang + "'";
+                java.sql.Connection conn = (Connection) Koneksi.configDB();
+                java.sql.Statement stm = conn.createStatement();
+                java.sql.ResultSet res = stm.executeQuery(sql);
+                while (res.next()) {
+                    String sat = res.getString("harga_jual_3_barang");
+                    String sat2 = sat;
+                    tbl_Penjualan.setValueAt(sat2, tbl_Penjualan.getSelectedRow(), 6);
                     System.out.println(sat2);
                 }
                 res.close();
@@ -2430,7 +2487,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Eror" + e);
         }
     }//GEN-LAST:event_comCustomerActionPerformed
-
     void load_dari_nama_barang() {
         int kode_barang = 0;
         int baris = tbl_Penjualan.getRowCount();
@@ -2451,7 +2507,6 @@ public final class Penjualan_Penjualan extends javax.swing.JFrame {
             java.sql.Statement stm = conn.createStatement();
             java.sql.ResultSet res = stm.executeQuery(sql);
             while (res.next()) {
-
                 String kode = res.getString(1);
                 int harga = Math.round(res.getFloat(11));
                 int jumlah = 1;

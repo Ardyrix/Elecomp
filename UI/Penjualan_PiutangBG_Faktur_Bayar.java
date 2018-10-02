@@ -57,8 +57,8 @@ public class Penjualan_PiutangBG_Faktur_Bayar extends javax.swing.JFrame {
             ResultSet res = stat.executeQuery(sql);
             int bayar = 0, bayar2 = 0;
             while (res.next()) {
-                bayar = Integer.valueOf(res.getString("bayar_keuangan"));
-                bayar2 = Integer.valueOf(res.getString("bayar_keuangan2"));
+                bayar = Integer.valueOf(res.getInt("bayar_keuangan"));
+                bayar2 = Integer.valueOf(res.getInt("bayar_keuangan2"));
                 txtBayar1.setText(res.getString("bayar_keuangan"));
                 txtBayar2.setText(res.getString("bayar_keuangan2"));
                 loadkeuangan(res.getString("kode_nama_keuangan"));

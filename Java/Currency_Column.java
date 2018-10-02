@@ -30,7 +30,7 @@ public class Currency_Column extends DefaultTableCellRenderer {
 
     public void setValue(Object value) {
         //  Format the Object before setting its value in the renderer
-        formatRp.setCurrencySymbol("Rp. ");
+        formatRp.setCurrencySymbol("Rp.");
         formatRp.setMonetaryDecimalSeparator(',');
         formatRp.setGroupingSeparator('.');
 
